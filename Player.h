@@ -5,7 +5,7 @@ struct Player
 	static constexpr int ID_LEN = 20;
 	static constexpr int NICK_NAME_LEN = 20;
 	static constexpr int SESSION_KEY_LEN = 64;
-	static constexpr int MAX_PLAYER_NUM = 5000;
+	static constexpr int MAX_PLAYER_NUM = 15000;
 	static constexpr int INITIAL_SECTOR_VALUE = 51;
 
 	bool bUsing_ = false;
