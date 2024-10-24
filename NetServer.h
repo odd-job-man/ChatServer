@@ -14,7 +14,7 @@ public:
 	virtual void OnRelease(ID id);
 	virtual void OnRecv(ID id, Packet* pPacket);
 	virtual void OnError(ID id, int errorType, Packet* pRcvdPacket);
-	void Monitoring();
+	void Monitoring(int updateCnt);
 	void Disconnect(ID id);
 	void DisconnectAll();
 	virtual void Stop();
@@ -22,7 +22,6 @@ public:
 	static unsigned __stdcall IOCPWorkerThread(LPVOID arg);
 private:
 	// Accept
-	LONG lAcceptTPS_ = 0;
 	LONG lSessionNum_ = 0;
 	LONG lMaxSession_;
 	ULONGLONG ullIdCounter = 0;
@@ -41,6 +40,11 @@ private:
 
 	// Monitoring º¯¼ö
 	// Recv (Per MSG)
+
+public:
+	LONG lPlayerNum = 0;
+	LONG lAcceptTotal_PREV = 0;
+	alignas(64) LONG lAcceptTotal_ = 0;
 	alignas(64) LONG lRecvTPS_ = 0;
 
 	// Send (Per MSG)

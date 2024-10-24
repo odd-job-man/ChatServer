@@ -188,13 +188,14 @@ template<typename T, bool bPlacementNew>
 class CTlsObjectPool
 {
 	using Bucket = Bucket<T, bPlacementNew>;
-private:
+public:
 	DWORD dwTlsIdx_;
 	alignas(64) uintptr_t metaTail_;
 	alignas(64) uintptr_t metaHead_;
 	alignas(64) uint64_t metaCnt_;
 	alignas(64) long capacity_;
 	alignas(64) long size_;
+private:
 
 	// 스레드의 Tls에 최초 할당 혹은 다써서 버킷이 없다면 락프리 스택구조로 버킷을 할당받는다.
 

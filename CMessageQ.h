@@ -30,6 +30,7 @@ private:
 
 	Node* pTailForSingle_;
 	Node* pHeadForSingle_;
+
 #ifdef NO_LOCK
 	static constexpr uint64_t SWAP_FLAG = 0x8000000000000000;
 	uint64_t SWAP_GUARD;

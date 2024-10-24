@@ -418,8 +418,8 @@ public:
 		packetPool.Free(pPacket);
 	}
 
-	//static inline CTlsObjectPool<Packet, false> packetPool;
-	static inline CLockFreeObjectPool<Packet, false> packetPool;
+	static inline CTlsObjectPool<Packet, false> packetPool;
+	//static inline CLockFreeObjectPool<Packet, false> packetPool;
 
 	friend class SmartPacket;
 	//friend void LanServer::RecvProc(Session* pSession, int numberOfBytesTransferred);

@@ -21,9 +21,9 @@ private:
 		}
 	};
 
-	//CTlsObjectPool<Node, true> pool_;
 public:
-	CLockFreeObjectPool<Node, true> pool_;
+	CTlsObjectPool<Node, true> pool_;
+	//CLockFreeObjectPool<Node, true> pool_;
 	alignas(64) uintptr_t metaTop_;
 	alignas(64) size_t metaCnt_;
 

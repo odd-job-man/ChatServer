@@ -22,6 +22,7 @@ void JOB_ON_ACCEPT(WORD playerIdx, ID sessionId)
 	pPlayer->LastRecvedTime_ = GetTickCount64();
 	pPlayer->bUsing_ = true;
 	pPlayer->sessionId_ = sessionId;
+	++g_ChatServer.lPlayerNum;
 }
 
 void JOB_ON_RELEASE(WORD playerIdx)
@@ -41,6 +42,7 @@ void JOB_ON_RELEASE(WORD playerIdx)
 	if (pPlayer->sectorX_ != Player::INITIAL_SECTOR_VALUE && pPlayer->sectorY_ != Player::INITIAL_SECTOR_VALUE)
 		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
 	pPlayer->bUsing_ = false;
+	--g_ChatServer.lPlayerNum;
 }
 
 

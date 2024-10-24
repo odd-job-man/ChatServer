@@ -19,8 +19,7 @@
 #include "MemLog.h"
 
 
-//CMessageQ g_MQ;
-CLockFreeQueue<Packet*> g_MQ;
+CMessageQ g_MQ;
 #define SERVERPORT 11402
 #define LINGER
 #define ZERO_BYTE_SEND
@@ -229,17 +228,24 @@ void NetServer::OnError(ID id, int errorType, Packet* pRcvdPacket)
 	}
 }
 
-void NetServer::Monitoring()
+void NetServer::Monitoring(int updateCnt)
 {
 	printf(
+		"update Count : %d\n"
+		"Packet Pool Alloc Cnt : %d\n"
 		"Accept TPS: %d\n"
+		"Accept Total : %d\n"
 		"Disconnect TPS: %d\n"
 		"Recv Msg TPS: %d\n"
 		"Send Msg TPS: %d\n"
-		"User Num : %d\n\n",
-		lAcceptTPS_, lDisconnectTPS_, lRecvTPS_, lSendTPS_, lSessionNum_);
+		"Session Num : %d\n"
+		"Player Num : %d\n\n",
+		updateCnt, Packet::packetPool.capacity_ - Packet::packetPool.size_, lAcceptTotal_ - lAcceptTotal_PREV, lAcceptTotal_, lDisconnectTPS_, lRecvTPS_, lSendTPS_, lSessionNum_, lPlayerNum);
 
-	lAcceptTPS_ = lDisconnectTPS_ = lRecvTPS_ = lSendTPS_ = 0;
+	lAcceptTotal_PREV = lAcceptTotal_;
+	InterlockedExchange(&lDisconnectTPS_, 0);
+	InterlockedExchange(&lRecvTPS_, 0);
+	InterlockedExchange(&lSendTPS_, 0);
 }
 
 void NetServer::Disconnect(ID id)
@@ -308,7 +314,7 @@ void NetServer::Stop()
 {
 	for (LONG i = 0; i < lMaxSession_; ++i)
 	{
-		pSessionArr_[i].sendPacketQ_.nodePool_.ClearAll();
+		//pSessionArr_[i].sendPacketQ_.nodePool_.ClearAll();
 	}
 
 	SYSTEM_INFO si;
@@ -326,16 +332,16 @@ void NetServer::Stop()
 	delete[] pSessionArr_;
 
 	// 직렬화 버퍼 풀 비우기
-	Packet::packetPool.ClearAll();
+	//Packet::packetPool.ClearAll();
 
 	// DisconnectStack 비우기
 	while (DisconnectStack_.Pop().has_value());
 	// DisconnectStack 풀 비우기
-	DisconnectStack_.pool_.ClearAll();
+	//DisconnectStack_.pool_.ClearAll();
 
-	while (g_MQ.Dequeue().has_value());
+	//while (g_MQ.Dequeue().has_value());
 	// 메시지 큐의 노드 풀 비우기
-	g_MQ.nodePool_.ClearAll();
+	//g_MQ.nodePool_.ClearAll();
 
 }
 
@@ -564,7 +570,7 @@ unsigned __stdcall NetServer::AcceptThread(LPVOID arg)
 			continue;
 		}
 
-		InterlockedIncrement((LONG*)&pNetServer->lAcceptTPS_);
+		InterlockedIncrement((LONG*)&pNetServer->lAcceptTotal_);
 		InterlockedIncrement((LONG*)&pNetServer->lSessionNum_);
 
 		short idx = pNetServer->DisconnectStack_.Pop().value();
