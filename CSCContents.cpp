@@ -74,7 +74,6 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 	if (isNonValidSector(sectorX, sectorY))
 	{
 		g_ChatServer.Disconnect(pPlayer->sessionId_);
-		int a;
 		return;
 	}
 

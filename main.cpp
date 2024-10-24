@@ -27,7 +27,7 @@ int main()
 {
 	timeBeginPeriod(1);
 	srand((unsigned)time(nullptr));
-	g_ChatServer.Start(5000);
+	g_ChatServer.Start(15000);
 
 	g_iFirst = timeGetTime();
 	g_iOldFrameTick = g_iFirst;
