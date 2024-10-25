@@ -30,6 +30,9 @@ private:
 
 	Node* pTailForSingle_;
 	Node* pHeadForSingle_;
+public:
+	unsigned long long BuffersToProcessThisFrame_ = 0;
+	alignas(64) unsigned long long workerEnqueuedBufferCnt_ = 0;
 
 #ifdef NO_LOCK
 	static constexpr uint64_t SWAP_FLAG = 0x8000000000000000;

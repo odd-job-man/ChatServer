@@ -18,9 +18,10 @@ constexpr int TIME_OUT_MILLISECONDS = 4000 * 10;
 bool PacketProc_PACKET(SmartPacket& sp);
 bool PacketProc_JOB(SmartPacket& sp);
 
-void Update()
+unsigned long long Update()
 {
 	g_MQ.Swap();
+	unsigned long long ret = g_MQ.BuffersToProcessThisFrame_;
 	while (true)
 	{
 		SmartPacket sp = g_MQ.Dequeue();
@@ -49,6 +50,7 @@ void Update()
 		if (GetTickCount64() - pPlayer->LastRecvedTime_ > TIME_OUT_MILLISECONDS)
 			g_ChatServer.Disconnect(pPlayer->sessionId_);
 	}
+	return ret;
 }
 
 bool PacketProc_PACKET(SmartPacket& sp)

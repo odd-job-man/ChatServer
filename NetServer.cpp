@@ -228,11 +228,13 @@ void NetServer::OnError(ID id, int errorType, Packet* pRcvdPacket)
 	}
 }
 
-void NetServer::Monitoring(int updateCnt)
+void NetServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThisFrame)
 {
 	printf(
 		"update Count : %d\n"
 		"Packet Pool Alloc Cnt : %d\n"
+		"MessageQ Queued By Worker : %llu\n"
+		"MessageQ Process At This Frame : %llu\n"
 		"Accept TPS: %d\n"
 		"Accept Total : %d\n"
 		"Disconnect TPS: %d\n"
@@ -240,7 +242,17 @@ void NetServer::Monitoring(int updateCnt)
 		"Send Msg TPS: %d\n"
 		"Session Num : %d\n"
 		"Player Num : %d\n\n",
-		updateCnt, Packet::packetPool.capacity_ - Packet::packetPool.size_, lAcceptTotal_ - lAcceptTotal_PREV, lAcceptTotal_, lDisconnectTPS_, lRecvTPS_, lSendTPS_, lSessionNum_, lPlayerNum);
+		updateCnt, 
+		Packet::packetPool.capacity_ - Packet::packetPool.size_,
+		g_MQ.workerEnqueuedBufferCnt_,
+		BuffersProcessAtThisFrame,
+		lAcceptTotal_ - lAcceptTotal_PREV,
+		lAcceptTotal_,
+		lDisconnectTPS_, 
+		lRecvTPS_,
+		lSendTPS_,
+		lSessionNum_, 
+		lPlayerNum);
 
 	lAcceptTotal_PREV = lAcceptTotal_;
 	InterlockedExchange(&lDisconnectTPS_, 0);

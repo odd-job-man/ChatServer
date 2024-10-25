@@ -23,13 +23,13 @@ constexpr int FRAME_PER_SECONDS = (1000) / TICK_PER_FRAME;
 
 extern NetServer g_ChatServer;
 
-void Update();
+unsigned long long Update();
 
 int main()
 {
 	timeBeginPeriod(1);
 	srand((unsigned)time(nullptr));
-	g_ChatServer.Start(15000);
+	g_ChatServer.Start(20000);
 
 	g_iFirst = timeGetTime();
 	g_iOldFrameTick = g_iFirst;
@@ -39,13 +39,13 @@ int main()
 
 	while (true)
 	{
-		Update();
+		unsigned long long ProcessBufferPerFrame = Update();
 		g_iTime = timeGetTime();
 		++g_iFPS;
 		// 프레임 밀렷을때 
 		if (g_iTime - g_iFpsCheck >= 1000)
 		{
-			g_ChatServer.Monitoring(g_iFPS);
+			g_ChatServer.Monitoring(g_iFPS, ProcessBufferPerFrame);
 			g_iFPS = 0;
 			g_iFpsCheck += 1000;
 		}

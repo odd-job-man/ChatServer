@@ -28,6 +28,7 @@ void CMessageQ::Enqueue(Packet* data)
 			continue;
 
 		InterlockedCompareExchangePointer((PVOID*)&pTailForWorker_, (PVOID)pNewNode, (PVOID)pTail);
+		InterlockedIncrement(&workerEnqueuedBufferCnt_);
 		break;
 	}
 
@@ -47,6 +48,7 @@ Packet* CMessageQ::Dequeue()
 	Node* pFree = pHeadForSingle_;
 	pHeadForSingle_ = pFree->pNext_;
 	packetPool_.Free(pFree);
+	--BuffersToProcessThisFrame_;
 	return pHeadForSingle_->data_;
 }
 
@@ -70,6 +72,10 @@ void CMessageQ::Swap()
 	if (pTailForWorker_ == nullptr)
 		__debugbreak();
 
+	unsigned long long BufferCntTemp;
+	BufferCntTemp = workerEnqueuedBufferCnt_;
+	workerEnqueuedBufferCnt_ = BuffersToProcessThisFrame_;
+	BuffersToProcessThisFrame_ = BufferCntTemp;
 #ifdef NO_LOCK
 	InterlockedAnd(&SWAP_GUARD, ~SWAP_FLAG);
 #else
