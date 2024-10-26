@@ -108,7 +108,3 @@ void DebugForSectorProb(Player* pPlayer)
 		__debugbreak();
 }
 
-bool isNonValidSector(WORD sectorX, WORD sectorY)
-{
-	return !((0 <= sectorX) && (sectorX <= NUM_OF_SECTOR_VERTICAL)) && ((0 <= sectorY) && (sectorY <= NUM_OF_SECTOR_HORIZONTAL));
-}

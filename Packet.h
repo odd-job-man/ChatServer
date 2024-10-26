@@ -9,8 +9,9 @@
 #include "NetServer.h"
 
 #define QUEUE
-//#include "CTlsObjectPool.h"
-#include "CLockFreeObjectPool.h"
+#include "CTlsObjectPool.h"
+
+
 
 using NET_HEADER = short;
 
@@ -25,6 +26,18 @@ enum ServerType
 	Net,
 	Lan
 };
+
+
+#define DEBUG_LEAK
+
+#ifdef DEBUG_LEAK
+#include <list>
+#define PACKET_ALLOC(type) Packet::AllocForDebugLeak<type>(__func__)
+#define PACKET_FREE(pPacket) Packet::FreeForDebugLeak(pPacket);
+#else
+#define PACKET_ALLOC(type) Packet::Alloc<type>()
+#define PACKET_FREE(pPacket) Packet::Free(pPacket)
+#endif
 
 class Packet
 {
@@ -407,22 +420,44 @@ public:
 	template<ServerType type>
 	static Packet* Alloc()
 	{
-		Packet* pPacket = packetPool.Alloc();
+		Packet* pPacket = packetPool_.Alloc();
 		pPacket->Clear<type>();
 		return pPacket;
 	}
 
-
 	static void Free(Packet* pPacket)
 	{
-		packetPool.Free(pPacket);
+		packetPool_.Free(pPacket);
 	}
 
-	static inline CTlsObjectPool<Packet, false> packetPool;
-	//static inline CLockFreeObjectPool<Packet, false> packetPool;
+#ifdef DEBUG_LEAK
+	char funcName_[100];
+	//// Start함수에서 초기화
+	static inline CRITICAL_SECTION cs_for_debug_leak;
+	static inline std::list<Packet*> debugList;
 
+	template<ServerType type>
+	static Packet* AllocForDebugLeak(const char* pFuncName)
+	{
+		Packet* pPacket = packetPool_.Alloc();
+		strcpy_s(pPacket->funcName_, _countof(pPacket->funcName_), pFuncName);
+		pPacket->Clear<type>();
+		EnterCriticalSection(&cs_for_debug_leak);
+		debugList.push_back(pPacket);
+		LeaveCriticalSection(&cs_for_debug_leak);
+		return pPacket;
+	}
+
+	static void FreeForDebugLeak(Packet* pPacket)
+	{
+		EnterCriticalSection(&cs_for_debug_leak);
+		debugList.remove(pPacket);
+		LeaveCriticalSection(&cs_for_debug_leak);
+		packetPool_.Free(pPacket);
+	}
+#endif
+	static inline CTlsObjectPool<Packet, false> packetPool_;
 	friend class SmartPacket;
-	//friend void LanServer::RecvProc(Session* pSession, int numberOfBytesTransferred);
 	friend void NetServer::RecvProc(Session* pSession, int numberOfBytesTransferred);
 	friend BOOL NetServer::SendPost(Session* pSession);
 	friend void NetServer::SendProc(Session* pSession, DWORD dwNumberOfBytesTransferred);
@@ -449,7 +484,7 @@ public:
 
 		if(pPacket_->DecrementRefCnt() == 0)
 		{
-			Packet::Free(pPacket_);
+			PACKET_FREE(pPacket_);
 		}
 	}
 

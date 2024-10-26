@@ -67,6 +67,10 @@ BOOL NetServer::Start()
 	TIME_OUT_MILLISECONDS_ = _wtoi((LPCWSTR)pStart);
 	ReleaseParser(psr);
 
+#ifdef DEBUG_LEAK
+	InitializeCriticalSection(&Packet::cs_for_debug_leak);
+#endif
+
 	int retval;
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -177,9 +181,7 @@ void NetServer::SendPacket(ID id, SmartPacket& sendPacket)
 	{
 		if (InterlockedDecrement(&pSession->IoCnt_) == 0)
 		{
-#ifdef MEMLOG
-			MemoryLog(SENDPACKET_RELEASE_TRY_1, id);
-#endif
+			MEMORY_LOG(SENDPACKET_RELEASE_TRY_1, id);
 			ReleaseSession(pSession);
 		}
 		return;
@@ -190,9 +192,7 @@ void NetServer::SendPacket(ID id, SmartPacket& sendPacket)
 	{
 		if (InterlockedDecrement(&pSession->IoCnt_) == 0)
 		{
-#ifdef MEMLOG
-			MemoryLog(SENDPACKET_RELEASE_TRY_2, pSession->id_);
-#endif
+			MEMORY_LOG(SENDPACKET_RELEASE_TRY_2, id);
 			ReleaseSession(pSession);
 		}
 		return;
@@ -205,9 +205,7 @@ void NetServer::SendPacket(ID id, SmartPacket& sendPacket)
 	SendPost(pSession);
 	if (InterlockedDecrement(&pSession->IoCnt_) == 0)
 	{
-#ifdef MEMLOG
-		MemoryLog(SENDPACKET_RELEASE_TRY_3, pSession->id_);
-#endif
+		MEMORY_LOG(SENDPACKET_RELEASE_TRY_3, id);
 		ReleaseSession(pSession);
 	}
 }
@@ -222,26 +220,22 @@ BOOL NetServer::OnConnectionRequest()
 
 void* NetServer::OnAccept(ID id)
 {
-	Packet* pPacket = Packet::Alloc<Net>();
+	Packet* pPacket = PACKET_ALLOC(Net);
 	pPacket->playerIdx_ = Player::MAKE_PLAYER_INDEX(id);
 	pPacket->recvType_ = JOB;
 	*pPacket << (WORD)en_JOB_ON_ACCEPT << id.ullId;
-#ifdef MEMLOG
-	MemoryLog(ON_ACCEPT, id);
-#endif
+	MEMORY_LOG(ON_ACCEPT, id);
 	g_MQ.Enqueue(pPacket);
 	return nullptr;
 }
 
 void NetServer::OnRelease(ID id)
 {
-	Packet* pPacket = Packet::Alloc<Net>();
+	Packet* pPacket = PACKET_ALLOC(Net);
 	pPacket->playerIdx_ = Session::GET_SESSION_INDEX(id);
 	pPacket->recvType_ = JOB;
 	*pPacket << (WORD)en_JOB_ON_RELEASE;
-#ifdef MEMLOG
-	MemoryLog(ON_RELEASE, id);
-#endif
+	MEMORY_LOG(ON_RELEASE, id);
 	g_MQ.Enqueue(pPacket);
 }
 
@@ -286,7 +280,7 @@ void NetServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThi
 		"Session Num : %d\n"
 		"Player Num : %d\n\n",
 		BuffersProcessAtThisFrame,
-		Packet::packetPool.capacity_, 
+		Packet::packetPool_.capacity_, 
 		g_MQ.packetPool_.capacity_,
 		g_MQ.workerEnqueuedBufferCnt_ ,
 		pSessionArr_[0].sendPacketQ_.nodePool_.capacity_,
@@ -388,7 +382,7 @@ void NetServer::Stop()
 	delete[] pSessionArr_;
 
 	// 직렬화 버퍼 풀 비우기
-	Packet::packetPool.ClearAll();
+	Packet::packetPool_.ClearAll();
 
 	// DisconnectStack 비우기
 	while (DisconnectStack_.Pop().has_value());
@@ -403,10 +397,23 @@ void NetServer::Stop()
 		"SerializeBuffer Pool Capacity : %d\n"
 		"DisconnectStackPool Capacity : %d\n"
 		"MessageQ Pool Capacity : %d\n",
-		Packet::packetPool.capacity_,
+		Packet::packetPool_.capacity_,
 		DisconnectStack_.pool_.capacity_,
 		g_MQ.packetPool_.capacity_
 	);
+
+#ifdef DEBUG_LEAK
+	size_t size = Packet::debugList.size();
+	printf("Leak Num : %zd\n\n", size);
+	if (size <= 0)
+		return;
+
+	printf("Alloced funcList : \n");
+	for (Packet* pPacket: Packet::debugList)
+	{
+		printf("%s, RefCnt : %d\n", pPacket->funcName_, pPacket->refCnt_);
+	}
+#endif
 }
 
 BOOL NetServer::RecvPost(Session* pSession)
@@ -492,7 +499,6 @@ BOOL NetServer::SendPost(Session* pSession)
 			if (pSession->bDisconnectCalled_ == true)
 			{
 				CancelIoEx((HANDLE)pSession->sock_, nullptr);
-				//InterlockedExchange((LONG*)&pSession->bSendingInProgress_, FALSE);
 				return FALSE;
 			}
 			return TRUE;
@@ -514,9 +520,7 @@ void NetServer::ReleaseSession(Session* pSession)
 	if (InterlockedCompareExchange(&pSession->IoCnt_, Session::RELEASE_FLAG | 0, 0) != 0)
 		return;
 
-#ifdef MEMLOG
-	MemoryLog(RELEASE_SESSION, pSession->id_);
-#endif
+	MEMORY_LOG(RELEASE_SESSION, pSession->id_);
 
 	// Release 될 Session의 직렬화 버퍼 정리
 	for (LONG i = 0; i < pSession->lSendBufNum_; ++i)
@@ -524,7 +528,7 @@ void NetServer::ReleaseSession(Session* pSession)
 		Packet* pPacket = pSession->pSendPacketArr_[i];
 		if (pPacket->DecrementRefCnt() == 0)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 		}
 	}
 
@@ -533,7 +537,7 @@ void NetServer::ReleaseSession(Session* pSession)
 		Packet* pPacket = pSession->sendPacketQ_.Dequeue().value();
 		if (pPacket->DecrementRefCnt() == 0)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 		}
 	}
 
@@ -557,10 +561,10 @@ void NetServer::RecvProc(Session* pSession, int numberOfBytesTransferred)
 		if (pSession->bDisconnectCalled_ == true)
 			return;
 
-		Packet* pPacket = Packet::Alloc<Net>();
+		Packet* pPacket = PACKET_ALLOC(Net);
 		if (pSession->recvRB_.Peek(pPacket->pBuffer_, sizeof(NetHeader)) == 0)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 			break;
 		}
 
@@ -568,7 +572,7 @@ void NetServer::RecvProc(Session* pSession, int numberOfBytesTransferred)
 
 		if (pSession->recvRB_.GetUseSize() < sizeof(NetHeader) + payloadLen)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 			break;
 		}
 
@@ -579,7 +583,7 @@ void NetServer::RecvProc(Session* pSession, int numberOfBytesTransferred)
 		// 넷서버에서만 호출되는 함수로 검증 및 디코드후 체크섬 확인
 		if (pPacket->ValidateReceived() == false)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 			Disconnect(pSession->id_);
 			return;
 		}
@@ -598,7 +602,7 @@ void NetServer::SendProc(Session* pSession, DWORD dwNumberOfBytesTransferred)
 		Packet* pPacket = pSession->pSendPacketArr_[i];
 		if (pPacket->DecrementRefCnt() == 0)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 		}
 	}
 

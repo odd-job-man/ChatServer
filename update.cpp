@@ -17,6 +17,8 @@ bool PacketProc_JOB(SmartPacket& sp);
 unsigned long long Update()
 {
 	static unsigned long long timeOutCheck = GetTickCount64();
+	static unsigned long long firstTimeOutCheck = timeOutCheck;
+
 	g_MQ.Swap();
 	unsigned long long ret = 0;
 	bool bStop = false;
@@ -50,12 +52,12 @@ unsigned long long Update()
 		Packet* pPacket;
 		while ((pPacket = g_MQ.Dequeue()) != nullptr)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 		}
 		g_MQ.Swap();
 		while ((pPacket = g_MQ.Dequeue()) != nullptr)
 		{
-			Packet::Free(pPacket);
+			PACKET_FREE(pPacket);
 		}
 		g_ChatServer.Stop();
 		return -1;
@@ -77,7 +79,7 @@ unsigned long long Update()
 			g_ChatServer.Disconnect(pPlayer->sessionId_);
 	}
 
-	timeOutCheck += 30000;
+	timeOutCheck += timeOutCheck - ((timeOutCheck - firstTimeOutCheck) % 30000);
 	return ret;
 }
 

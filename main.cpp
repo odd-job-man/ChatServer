@@ -15,7 +15,6 @@ int g_iOldFrameTick;
 int g_iFpsCheck;
 int g_iTime;
 int g_iFPS;
-int g_iNetworkLoop;
 int g_iFirst;
 
 constexpr int TICK_PER_FRAME = 40;

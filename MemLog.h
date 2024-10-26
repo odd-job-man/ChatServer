@@ -21,6 +21,15 @@ struct MemLog
 };
 
 constexpr int ARRAY_SIZE = 5000000;
+
 int MemoryLog(EVENT event, ID sessionID);
 void MemLogWriteToFile(int lastIdx);
 void MemLogRead(MemLog* memLogBuffer, unsigned long long* pOutCounter, int* pOutLastIdx);
+
+#ifdef MEMLOG
+#define MEMORY_LOG(event, sessionID) MemoryLog(event,sessionID)
+#define MEMORY_LOG_WRITE_TO_FILE(lastIdx) MemLogWriteToFile(lastIdx)
+#else
+#define MEMORY_LOG(event, sessionID)
+#define MEMORY_LOG_WRITE_TO_FILE(lastIdx)
+#endif
