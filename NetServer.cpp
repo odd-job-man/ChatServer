@@ -403,6 +403,7 @@ void NetServer::Stop()
 	);
 
 #ifdef DEBUG_LEAK
+#ifdef DEBUG_LEAK_STD_LIST
 	size_t size = Packet::debugList.size();
 	printf("Leak Num : %zd\n\n", size);
 	if (size <= 0)
@@ -412,6 +413,20 @@ void NetServer::Stop()
 	for (Packet* pPacket: Packet::debugList)
 	{
 		printf("%s, RefCnt : %d\n", pPacket->funcName_, pPacket->refCnt_);
+	}
+#else
+#endif
+	size_t size = Packet::debugList.size();
+	printf("Leak Num : %zd\n\n", size);
+	if (size <= 0)
+		return;
+
+	printf("Alloced funcList : \n");
+	void* pPacket = Packet::debugList.GetFirst();
+	while (pPacket != nullptr)
+	{
+		printf("%s, RefCnt : %d\n", ((Packet*)pPacket)->funcName_, ((Packet*)pPacket)->refCnt_);
+		pPacket = Packet::debugList.GetNext(pPacket);
 	}
 #endif
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <memory.h>
 #include "CLockFreeQueue.h"
+#include <stddef.h>
 #include "CLockFreeStack.h"
 #include "RingBuffer.h"
 #include "Session.h"
@@ -27,11 +28,11 @@ enum ServerType
 	Lan
 };
 
-
 #define DEBUG_LEAK
 
 #ifdef DEBUG_LEAK
 #include <list>
+#include "CLinkedList.h"
 #define PACKET_ALLOC(type) Packet::AllocForDebugLeak<type>(__func__)
 #define PACKET_FREE(pPacket) Packet::FreeForDebugLeak(pPacket);
 #else
@@ -55,7 +56,7 @@ public:
 		unsigned char randomKey_;
 		unsigned char checkSum_;
 	};
-#pragma pack(pop,1)
+#pragma pack(pop)
 
 	static inline unsigned char PACKET_CODE;
 	static inline unsigned char FIXED_KEY;
@@ -312,6 +313,11 @@ public:
 
 #pragma warning(disable : 26495)
 	Packet()
+#ifdef DEBUG_LEAK
+#ifndef DEBUG_LEAK_STD_LIST
+		:pDebugLink{ offsetof(Packet,pDebugLink) }
+#endif
+#endif
 	{
 		pBuffer_ = new char[BUFFER_SIZE];
 	}
@@ -343,19 +349,19 @@ public:
 
 	void Encode(NetHeader* pHeader)
 	{
-			char d = pHeader->checkSum_;
-			char p = d ^ (pHeader->randomKey_ + 1);
-			char e = p ^ (FIXED_KEY + 1);
-			pHeader->checkSum_ = e;
+		char d = pHeader->checkSum_;
+		char p = d ^ (pHeader->randomKey_ + 1);
+		char e = p ^ (FIXED_KEY + 1);
+		pHeader->checkSum_ = e;
 
-			char* payload = pBuffer_ + sizeof(NetHeader);
-			for (int i = 0; i < pHeader->payloadLen_; i++)
-			{
-				d = payload[i];
-				p = d ^ (p + pHeader->randomKey_+ 2 + i);
-				e = p ^ (e + FIXED_KEY + 2 + i);
-				payload[i] = e;
-			}
+		char* payload = pBuffer_ + sizeof(NetHeader);
+		for (int i = 0; i < pHeader->payloadLen_; i++)
+		{
+			d = payload[i];
+			p = d ^ (p + pHeader->randomKey_ + 2 + i);
+			e = p ^ (e + FIXED_KEY + 2 + i);
+			payload[i] = e;
+		}
 	}
 
 	void Decode(NetHeader* pHeader)
@@ -434,7 +440,12 @@ public:
 	char funcName_[100];
 	//// Start함수에서 초기화
 	static inline CRITICAL_SECTION cs_for_debug_leak;
+#ifdef DEBUG_LEAK_STD_LIST
 	static inline std::list<Packet*> debugList;
+#else
+	LINKED_NODE pDebugLink;
+	static inline CLinkedList debugList{ 128 };
+#endif
 
 	template<ServerType type>
 	static Packet* AllocForDebugLeak(const char* pFuncName)

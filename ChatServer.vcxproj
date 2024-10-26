@@ -121,6 +121,7 @@
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/Zc:offsetof- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CAddressTranslator.h" />
+    <ClInclude Include="CLinkedList.h" />
     <ClInclude Include="CLockFreeObjectPool.h" />
     <ClInclude Include="CLockFreeQueue.h" />
     <ClInclude Include="CLockFreeStack.h" />
@@ -153,6 +155,7 @@
     <ClInclude Include="Session.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CLinkedList.cpp" />
     <ClCompile Include="CMessageQ.cpp" />
     <ClCompile Include="CSCContents.cpp" />
     <ClCompile Include="main.cpp" />
@@ -163,6 +166,9 @@
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="update.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

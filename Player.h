@@ -1,5 +1,6 @@
 #pragma once
 #include<windows.h>
+#include "CLinkedList.h"
 struct Player
 {
 	static constexpr int ID_LEN = 20;
@@ -9,7 +10,8 @@ struct Player
 	static inline Player* pPlayerArr;
 	static constexpr int INITIAL_SECTOR_VALUE = 51;
 
-	bool bUsing_ = false;
+	bool bUsing_;
+	LINKED_NODE sectorLink;
 	ID sessionId_;
 	WORD sectorX_;
 	WORD sectorY_;
@@ -18,7 +20,11 @@ struct Player
 	WCHAR ID_[ID_LEN];
 	WCHAR nickName_[NICK_NAME_LEN];
 	// 좀 애매함
-	//char sessionKey_[SESSION_KEY_LEN];
+
+	Player()
+		:sectorLink{ offsetof(Player,sectorLink) },bUsing_{false}
+	{}
+
 	static WORD MAKE_PLAYER_INDEX(ID sessionId)
 	{
 		return sessionId.ullId & 0xFFFF;

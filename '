@@ -1,0 +1,58 @@
+#pragma once
+#include <type_traits>
+#include <list>
+
+struct LINKED_NODE
+{
+	const int offset_;
+	LINKED_NODE* pNext_;
+	LINKED_NODE* pPrev_;
+	LINKED_NODE(const int offset);
+};
+
+class CLinkedList
+{
+public:
+	const int offset_;
+	LINKED_NODE* pHead_;
+	LINKED_NODE* pTail_;
+	CLinkedList(const int offset);
+	void push_back(void* pNewData);
+	void* remove(void* pVictim);
+
+	class iterator
+	{
+		LINKED_NODE* pPointing_;
+	public:
+		__forceinline iterator(LINKED_NODE* pPointing)
+			:pPointing_{ pPointing }
+		{}
+
+		__forceinline LINKED_NODE* operator*()
+		{
+			return pPointing_;
+		}
+
+		__forceinline iterator& operator++()
+		{
+			if (pPointing_ != nullptr)
+				pPointing_ = pPointing_->pNext_;
+
+			return *this;
+		}
+	};
+
+	__forceinline iterator begin()
+	{
+		return iterator{ pHead_ };
+	}
+
+	__forceinline iterator end()
+	{
+		return iterator{ nullptr };
+	}
+
+};
+
+
+

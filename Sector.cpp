@@ -1,6 +1,7 @@
 #include <WinSock2.h>
 #include <emmintrin.h>
 #include "RingBuffer.h"
+#include "CLinkedList.h"
 #include "Packet.h"
 #include "Session.h"
 #include "Sector.h"
@@ -12,11 +13,32 @@
 
 extern NetServer g_ChatServer;
 
+#define MYLIST_SECTOR
+struct SectorArray
+{
+#ifdef MYLIST_SECTOR
+	CLinkedList(*listArr)[NUM_OF_SECTOR_VERTICAL];
+	SectorArray()
+	{
+		listArr = (CLinkedList(*)[NUM_OF_SECTOR_VERTICAL])malloc(sizeof(CLinkedList) * NUM_OF_SECTOR_HORIZONTAL * NUM_OF_SECTOR_VERTICAL);
+		for (int y = 0; y < NUM_OF_SECTOR_VERTICAL; ++y)
+		{
+			for (int x = 0; x < NUM_OF_SECTOR_HORIZONTAL; ++x)
+			{
+				new(&listArr[y][x])CLinkedList{offsetof(Player,sectorLink)};
+			}
+		}
+	}
+#else
+	std::list<Player*> listArr[NUM_OF_SECTOR_VERTICAL][NUM_OF_SECTOR_HORIZONTAL];
+#endif
+}sectors;
 
-std::list<Player*> g_Sector[NUM_OF_SECTOR_VERTICAL][NUM_OF_SECTOR_HORIZONTAL];
+
 
 void GetSectorAround(WORD sectorX, WORD sectorY, SECTOR_AROUND* pOutSectorAround)
 {
+
 	pOutSectorAround->sectorCount = 0;
 	__m128i posY = _mm_set1_epi16(sectorY);
 	__m128i posX = _mm_set1_epi16(sectorX);
@@ -82,29 +104,34 @@ void GetSectorAround(WORD sectorX, WORD sectorY, SECTOR_AROUND* pOutSectorAround
 
 void RegisterClientAtSector(WORD sectorX, WORD sectorY, Player* pPlayer)
 {
-	g_Sector[sectorY][sectorX].push_back(pPlayer);
+	sectors.listArr[sectorY][sectorX].push_back(pPlayer);
 }
 
 void RemoveClientAtSector(WORD sectorX, WORD sectorY, Player* pPlayer)
 {
-	g_Sector[sectorY][sectorX].remove(pPlayer);
+	sectors.listArr[sectorY][sectorX].remove(pPlayer);
 }
 
 void SendPacket_AROUND(SECTOR_AROUND* pSectorAround, SmartPacket& sp)
 {
+#ifdef MYLIST_SECTOR
 	for (int i = 0; i < pSectorAround->sectorCount; ++i)
 	{
-		for (auto* player : g_Sector[pSectorAround->Around[i].sectorY][pSectorAround->Around[i].sectorX])
+		CLinkedList* pList = &sectors.listArr[pSectorAround->Around[i].sectorY][pSectorAround->Around[i].sectorX];
+		void* pPlayer = pList->GetFirst();
+		while (pPlayer != nullptr)
 		{
-			g_ChatServer.SendPacket(player->sessionId_, sp);
+			g_ChatServer.SendPacket(((Player*)pPlayer)->sessionId_, sp);
+			pPlayer = pList->GetNext(pPlayer);
 		}
 	}
+#else
+	for (int i = 0; i < pSectorAround->sectorCount; ++i)
+	{
+		for (void* player : sectors.listArr[pSectorAround->Around[i].sectorY][pSectorAround->Around[i].sectorX])
+		{
+			g_ChatServer.SendPacket(((Player*)player)->sessionId_, sp);
+		}
+	}
+#endif
 }
-
-void DebugForSectorProb(Player* pPlayer)
-{
-	auto it = std::find(g_Sector[pPlayer->sectorY_][pPlayer->sectorX_].begin(), g_Sector[pPlayer->sectorY_][pPlayer->sectorX_].end(), pPlayer);
-	if (it != g_Sector[pPlayer->sectorY_][pPlayer->sectorX_].end())
-		__debugbreak();
-}
-
