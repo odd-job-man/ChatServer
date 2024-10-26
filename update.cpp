@@ -9,23 +9,20 @@
 #include "Logger.h"
 #include "ErrType.h"
 extern CMessageQ g_MQ;
-extern Player g_playerArr[5000];
 extern NetServer g_ChatServer;
-
-constexpr int TIME_OUT_MILLISECONDS = 4000 * 10;
-
 
 bool PacketProc_PACKET(SmartPacket& sp);
 bool PacketProc_JOB(SmartPacket& sp);
 
 unsigned long long Update()
 {
+	static unsigned long long timeOutCheck = GetTickCount64();
 	g_MQ.Swap();
-	unsigned long long ret = g_MQ.BuffersToProcessThisFrame_;
+	unsigned long long ret = 0;
+	bool bStop = false;
 	while (true)
 	{
 		SmartPacket sp = g_MQ.Dequeue();
-
 		if (sp.GetPacket() == nullptr)
 			break;
 
@@ -37,19 +34,50 @@ unsigned long long Update()
 		{
 			PacketProc_JOB(sp);
 		}
+
+		if (GetAsyncKeyState(VK_RETURN) & 0x01)
+		{
+			g_ChatServer.DisconnectAll();
+			bStop = true;
+			break;
+		}
+		++ret;
 	}
 
-
-	for (int i = 0; i < Player::MAX_PLAYER_NUM; ++i)
+	if (bStop)
 	{
-		Player* pPlayer = g_playerArr + i;
+		// 메시지 큐 비우기
+		Packet* pPacket;
+		while ((pPacket = g_MQ.Dequeue()) != nullptr)
+		{
+			Packet::Free(pPacket);
+		}
+		g_MQ.Swap();
+		while ((pPacket = g_MQ.Dequeue()) != nullptr)
+		{
+			Packet::Free(pPacket);
+		}
+		g_ChatServer.Stop();
+		return -1;
+	}
+
+	unsigned long long currentTime = GetTickCount64();
+	// 3초에 한번씩 타임아웃 체크함(우선 하드코딩)
+	if (currentTime - timeOutCheck <= 30000)
+		return ret;
+
+	for (int i = 0; i < g_ChatServer.maxSession_; ++i)
+	{
+		Player* pPlayer = Player::pPlayerArr + i;
 		if (pPlayer->bUsing_ == false)
 			continue;
 
 		//40초 지나면 타임 아웃 처리
-		if (GetTickCount64() - pPlayer->LastRecvedTime_ > TIME_OUT_MILLISECONDS)
+		if (currentTime - pPlayer->LastRecvedTime_ > g_ChatServer.TIME_OUT_MILLISECONDS_)
 			g_ChatServer.Disconnect(pPlayer->sessionId_);
 	}
+
+	timeOutCheck += 30000;
 	return ret;
 }
 
@@ -72,8 +100,8 @@ bool PacketProc_PACKET(SmartPacket& sp)
 		CS_CHAT_REQ_HEARTBEAT_RECV(sp);
 		break;
 	default:
-		g_ChatServer.OnError(g_playerArr[sp->playerIdx_].sessionId_, (int)PACKET_PROC_RECVED_PACKET_INVALID_TYPE, sp.GetPacket());
-		g_ChatServer.Disconnect(g_playerArr[sp->playerIdx_].sessionId_);
+		g_ChatServer.OnError(Player::pPlayerArr[sp->playerIdx_].sessionId_, (int)PACKET_PROC_RECVED_PACKET_INVALID_TYPE, sp.GetPacket());
+		g_ChatServer.Disconnect(Player::pPlayerArr[sp->playerIdx_].sessionId_);
 		break;
 	}
 	return true;

@@ -1,4 +1,5 @@
 #include <Winsock2.h>
+#include <WS2tcpip.h>
 #include <windows.h>
 #include <process.h>
 #include <stdio.h>
@@ -13,20 +14,59 @@
 #include "Job.h"
 #include "Player.h"
 #include "ErrType.h"
-#pragma comment(lib,"LoggerMt.lib")
-#pragma comment(lib, "ws2_32.lib")
 #include "Logger.h"
 #include "MemLog.h"
-
+#include "Parser.h"
+#include <locale>
+#pragma comment(lib,"LoggerMt.lib")
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib,"TextParser.lib")
 
 CMessageQ g_MQ;
-#define SERVERPORT 11402
-#define LINGER
-#define ZERO_BYTE_SEND
-
-
-BOOL NetServer::Start(DWORD dwMaxSession)
+BOOL NetServer::Start()
 {
+	std::locale::global(std::locale(""));
+	char* pStart;
+	char* pEnd;
+	PARSER psr = CreateParser(L"ChatServerConfig.txt");
+
+	WCHAR ipStr[16];
+	GetValue(psr, L"BIND_IP", (PVOID*)&pStart, (PVOID*)&pEnd);
+	unsigned long long stringLen = (pEnd - pStart) / sizeof(WCHAR);
+	wcsncpy_s(ipStr, _countof(ipStr) - 1, (const WCHAR*)pStart, stringLen);
+	// Null terminated String 으로 끝내야 InetPtonW쓸수잇음
+	ipStr[stringLen] = 0;
+
+	ULONG ip;
+	InetPtonW(AF_INET, ipStr, &ip);
+	GetValue(psr, L"BIND_PORT", (PVOID*)&pStart, nullptr);
+	short SERVER_PORT = (short)_wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"IOCP_WORKER_THREAD", (PVOID*)&pStart, nullptr);
+	IOCP_WORKER_THREAD_NUM_ = (DWORD)_wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"IOCP_ACTIVE_THREAD", (PVOID*)&pStart, nullptr);
+	DWORD IOCP_ACTIVE_THREAD_NUM = (DWORD)_wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"IS_ZERO_BYTE_SEND", (PVOID*)&pStart, nullptr);
+	int bZeroByteSend = _wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"SESSION_MAX", (PVOID*)&pStart, nullptr);
+	maxSession_ = _wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"USER_MAX", (PVOID*)&pStart, nullptr);
+	Player::MAX_PLAYER_NUM = (short)_wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"PACKET_CODE", (PVOID*)&pStart, nullptr);
+	Packet::PACKET_CODE = (unsigned char)_wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"PACKET_KEY", (PVOID*)&pStart, nullptr);
+	Packet::FIXED_KEY = (unsigned char)_wtoi((LPCWSTR)pStart);
+
+	GetValue(psr, L"TIME_OUT_MILLISECONDS", (PVOID*)&pStart, nullptr);
+	TIME_OUT_MILLISECONDS_ = _wtoi((LPCWSTR)pStart);
+	ReleaseParser(psr);
+
 	int retval;
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -36,7 +76,7 @@ BOOL NetServer::Start(DWORD dwMaxSession)
 	}
 	LOG(L"ONOFF", SYSTEM, TEXTFILE, L"WSAStartUp OK!");
 	// NOCT에 0들어가면 논리프로세서 수만큼을 설정함
-	hcp_ = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
+	hcp_ = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, IOCP_ACTIVE_THREAD_NUM);
 	if (!hcp_)
 	{
 		LOG(L"ONOFF", SYSTEM, TEXTFILE, L"CreateIoCompletionPort Fail ErrCode : %u", WSAGetLastError());
@@ -46,6 +86,7 @@ BOOL NetServer::Start(DWORD dwMaxSession)
 
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
+
 
 	hListenSock_ = socket(AF_INET, SOCK_STREAM, 0);
 	if (hListenSock_ == INVALID_SOCKET)
@@ -59,8 +100,8 @@ BOOL NetServer::Start(DWORD dwMaxSession)
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-	serveraddr.sin_port = htons(SERVERPORT);
+	serveraddr.sin_addr.S_un.S_addr = ip;
+	serveraddr.sin_port = htons(SERVER_PORT);
 	retval = bind(hListenSock_, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
 	if (retval == SOCKET_ERROR)
 	{
@@ -78,22 +119,25 @@ BOOL NetServer::Start(DWORD dwMaxSession)
 	}
 	LOG(L"ONOFF", SYSTEM, TEXTFILE, L"listen() OK");
 
-#ifdef LINGER
 	linger linger;
 	linger.l_linger = 0;
 	linger.l_onoff = 1;
 	setsockopt(hListenSock_, SOL_SOCKET, SO_LINGER, (char*)&linger, sizeof(linger));
 	LOG(L"ONOFF", SYSTEM, TEXTFILE, L"linger() OK");
-#endif
 
-#ifdef ZERO_BYTE_SEND
-	DWORD dwSendBufSize = 0;
-	setsockopt(hListenSock_, SOL_SOCKET, SO_SNDBUF, (char*)&dwSendBufSize, sizeof(dwSendBufSize));
-	LOG(L"ONOFF", SYSTEM, TEXTFILE, L"Zerobyte Send OK");
-#endif
+	if (bZeroByteSend == 1)
+	{
+		DWORD dwSendBufSize = 0;
+		setsockopt(hListenSock_, SOL_SOCKET, SO_SNDBUF, (char*)&dwSendBufSize, sizeof(dwSendBufSize));
+		LOG(L"ONOFF", SYSTEM, TEXTFILE, L"ZeroByte Send OK");
+	}
+	else
+	{
+		LOG(L"ONOFF", SYSTEM, TEXTFILE, L"NO ZeroByte Send");
+	}
 
-	hIOCPWorkerThreadArr_ = new HANDLE[si.dwNumberOfProcessors * 2];
-	for (DWORD i = 0; i < si.dwNumberOfProcessors * 2; ++i)
+	hIOCPWorkerThreadArr_ = new HANDLE[IOCP_WORKER_THREAD_NUM_];
+	for (DWORD i = 0; i < IOCP_WORKER_THREAD_NUM_; ++i)
 	{
 		hIOCPWorkerThreadArr_[i] = (HANDLE)_beginthreadex(NULL, 0, IOCPWorkerThread, this, 0, nullptr);
 		if (!hIOCPWorkerThreadArr_[i])
@@ -108,12 +152,9 @@ BOOL NetServer::Start(DWORD dwMaxSession)
 	if (!CAddressTranslator::CheckMetaCntBits())
 		__debugbreak();
 
-	pSessionArr_ = new Session[dwMaxSession];
-	lMaxSession_ = dwMaxSession;
-	for (int i = dwMaxSession - 1; i >= 0; --i)
-	{
+	pSessionArr_ = new Session[maxSession_];
+	for (int i = maxSession_ - 1; i >= 0; --i)
 		DisconnectStack_.Push(i);
-	}
 
 	hAcceptThread_ = (HANDLE)_beginthreadex(NULL, 0, AcceptThread, this, 0, nullptr);
 	if (!hAcceptThread_)
@@ -122,6 +163,7 @@ BOOL NetServer::Start(DWORD dwMaxSession)
 		__debugbreak();
 	}
 	LOG(L"ONOFF", SYSTEM, TEXTFILE, L"MAKE AccpetThread OK!");
+	Player::pPlayerArr = new Player[maxSession_];
 	return 0;
 }
 
@@ -172,7 +214,7 @@ void NetServer::SendPacket(ID id, SmartPacket& sendPacket)
 
 BOOL NetServer::OnConnectionRequest()
 {
-	if (lSessionNum_ + 1 >= lMaxSession_)
+	if (lSessionNum_ + 1 >= maxSession_)
 		return FALSE;
 
 	return TRUE;
@@ -231,10 +273,11 @@ void NetServer::OnError(ID id, int errorType, Packet* pRcvdPacket)
 void NetServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThisFrame)
 {
 	printf(
-		"update Count : %d\n"
-		"Packet Pool Alloc Cnt : %d\n"
+		"update Count : %llu\n"
+		"Packet Pool Alloc Capacity : %d\n"
+		"MessageQ Capacity : %d\n"
 		"MessageQ Queued By Worker : %llu\n"
-		"MessageQ Process At This Frame : %llu\n"
+		"SendQ Pool Capacity : %d\n"
 		"Accept TPS: %d\n"
 		"Accept Total : %d\n"
 		"Disconnect TPS: %d\n"
@@ -242,10 +285,11 @@ void NetServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThi
 		"Send Msg TPS: %d\n"
 		"Session Num : %d\n"
 		"Player Num : %d\n\n",
-		updateCnt, 
-		Packet::packetPool.capacity_ - Packet::packetPool.size_,
-		g_MQ.workerEnqueuedBufferCnt_,
 		BuffersProcessAtThisFrame,
+		Packet::packetPool.capacity_, 
+		g_MQ.packetPool_.capacity_,
+		g_MQ.workerEnqueuedBufferCnt_ ,
+		pSessionArr_[0].sendPacketQ_.nodePool_.capacity_,
 		lAcceptTotal_ - lAcceptTotal_PREV,
 		lAcceptTotal_,
 		lDisconnectTPS_, 
@@ -312,7 +356,7 @@ void NetServer::DisconnectAll()
 	WaitForSingleObject(hAcceptThread_, INFINITE);
 	CloseHandle(hAcceptThread_);
 
-	LONG MaxSession = lMaxSession_;
+	LONG MaxSession = maxSession_;
 	for (LONG i = 0; i < MaxSession; ++i)
 	{
 		// RELEASE 중이 아니라면 Disconnect
@@ -324,37 +368,45 @@ void NetServer::DisconnectAll()
 
 void NetServer::Stop()
 {
-	for (LONG i = 0; i < lMaxSession_; ++i)
-	{
-		//pSessionArr_[i].sendPacketQ_.nodePool_.ClearAll();
-	}
-
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
-	for (DWORD i = 0; i < si.dwNumberOfProcessors * 2; ++i)
+	for (DWORD i = 0; i < IOCP_WORKER_THREAD_NUM_; ++i)
 	{
 		PostQueuedCompletionStatus(hcp_, 0, 0, 0);
 	}
-	WaitForMultipleObjects(si.dwNumberOfProcessors * 2, hIOCPWorkerThreadArr_, TRUE, INFINITE);
-	for (DWORD i = 0; i < si.dwNumberOfProcessors * 2; ++i)
+
+	WaitForMultipleObjects(IOCP_WORKER_THREAD_NUM_, hIOCPWorkerThreadArr_, TRUE, INFINITE);
+	for (DWORD i = 0; i < IOCP_WORKER_THREAD_NUM_; ++i)
 	{
 		CloseHandle(hIOCPWorkerThreadArr_[i]);
 	}
-
+	for (LONG i = 0; i < maxSession_; ++i)
+	{
+		pSessionArr_[i].sendPacketQ_.ClearAll();
+	}
+	pSessionArr_[0].sendPacketQ_.nodePool_.ClearAll();
 	delete[] pSessionArr_;
 
 	// 직렬화 버퍼 풀 비우기
-	//Packet::packetPool.ClearAll();
+	Packet::packetPool.ClearAll();
 
 	// DisconnectStack 비우기
 	while (DisconnectStack_.Pop().has_value());
 	// DisconnectStack 풀 비우기
-	//DisconnectStack_.pool_.ClearAll();
+	DisconnectStack_.pool_.ClearAll();
 
-	//while (g_MQ.Dequeue().has_value());
+	g_MQ.ClearAll();
 	// 메시지 큐의 노드 풀 비우기
-	//g_MQ.nodePool_.ClearAll();
+	g_MQ.packetPool_.ClearAll();
 
+	printf(
+		"SerializeBuffer Pool Capacity : %d\n"
+		"DisconnectStackPool Capacity : %d\n"
+		"MessageQ Pool Capacity : %d\n",
+		Packet::packetPool.capacity_,
+		DisconnectStack_.pool_.capacity_,
+		g_MQ.packetPool_.capacity_
+	);
 }
 
 BOOL NetServer::RecvPost(Session* pSession)

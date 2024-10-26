@@ -134,6 +134,19 @@ public:
 		}
 	}
 
+	// 메모리 누수 디버깅용
+	void ClearAll()
+	{
+		uintptr_t metaHead = metaHead_;
+		Node* pRealHead;
+		do
+		{
+			pRealHead = (Node*)CAddressTranslator::GetRealAddr(metaHead);
+			metaHead = pRealHead->next_.metaAddr_;
+			nodePool_.Free(pRealHead);
+		} while (CAddressTranslator::GetRealAddr(metaHead) != 0);
+	}
+
 	__forceinline const long GetSize() const
 	{
 		return num_;

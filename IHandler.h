@@ -4,7 +4,7 @@ class SmartPacket;
 class IHandler
 {
 public:
-	virtual BOOL Start(DWORD dwMaxSession) = 0;
+	virtual BOOL Start() = 0;
 	//virtual void Stop() = 0;
 	virtual void SendPacket(ID id, SmartPacket& sendPacket) = 0;
 	virtual BOOL OnConnectionRequest() = 0;

@@ -5,7 +5,8 @@ struct Player
 	static constexpr int ID_LEN = 20;
 	static constexpr int NICK_NAME_LEN = 20;
 	static constexpr int SESSION_KEY_LEN = 64;
-	static constexpr int MAX_PLAYER_NUM = 20000;
+	static inline int MAX_PLAYER_NUM;
+	static inline Player* pPlayerArr;
 	static constexpr int INITIAL_SECTOR_VALUE = 51;
 
 	bool bUsing_ = false;

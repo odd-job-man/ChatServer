@@ -44,7 +44,8 @@ public:
 	};
 #pragma pack(pop,1)
 
-	static constexpr unsigned char FIXED_KEY = 0x32;
+	static inline unsigned char PACKET_CODE;
+	static inline unsigned char FIXED_KEY;
 	static constexpr int RINGBUFFER_SIZE = 10000;
 	static constexpr int BUFFER_SIZE = (RINGBUFFER_SIZE / 8) + sizeof(NetHeader);
 
@@ -374,7 +375,7 @@ public:
 
 			// 헤더 설정
 			NetHeader* pHeader = (NetHeader*)pBuffer_;
-			pHeader->code_ = 0x77;
+			pHeader->code_ = PACKET_CODE;
 			pHeader->payloadLen_ = rear_ - front_;
 			pHeader->randomKey_ = rand();
 			pHeader->checkSum_ = GetCheckSum((unsigned char*)pHeader + sizeof(NetHeader), pHeader->payloadLen_);
@@ -393,11 +394,10 @@ public:
 	{
 		// 아예 얼토당토않은 패킷이 왓을때를 위한 검증
 		NetHeader* pHeader = (NetHeader*)pBuffer_;
-		if (pHeader->code_ != 0x77)
+		if (pHeader->code_ != PACKET_CODE)
 			return false;
 
 		Decode(pHeader);
-
 		if (pHeader->checkSum_ != GetCheckSum((unsigned char*)pHeader + sizeof(NetHeader), pHeader->payloadLen_))
 			return false;
 

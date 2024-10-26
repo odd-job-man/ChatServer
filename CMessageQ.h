@@ -4,8 +4,7 @@
 #include "Packet.h"
 class CMessageQ
 {
-private:
-private:
+public:
 	struct Node
 	{
 		Packet* data_;
@@ -23,7 +22,6 @@ private:
 		{}
 	};
 
-private:
 	CTlsObjectPool<Node, true> packetPool_;
 	Node* pTailForWorker_;
 	Node* pHeadForWorker_;
@@ -41,20 +39,11 @@ public:
 	SRWLOCK SWAP_GUARD;
 #endif
 public:
-	CMessageQ()
-	{
-		pTailForWorker_ = pHeadForWorker_ = packetPool_.Alloc();
-		pTailForSingle_ = pHeadForSingle_ = packetPool_.Alloc();
-#ifdef NO_LOCK
-		SWAP_GUARD = 0;
-#else
-		InitializeSRWLock(&SWAP_GUARD);
-#endif
-	}
-
+	CMessageQ();
 	// meta가 붙으면 상위 17비트가 조작된 값
 	// real이 붙으면 상위 17비트를 제거한 값
 	void Enqueue(Packet* data);
 	Packet* Dequeue();
 	void Swap();
+	void ClearAll();
 };

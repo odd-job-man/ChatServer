@@ -3,12 +3,11 @@
 #include "Sector.h"
 #include "MemLog.h"
 NetServer g_ChatServer;
-Player g_playerArr[Player::MAX_PLAYER_NUM];
 
 void JOB_ON_ACCEPT(WORD playerIdx, ID sessionId)
 {
 	// 이미 true라는 이야기는 이중 ON_ACCEPT임
-	Player* pPlayer = g_playerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + playerIdx;
 #ifdef MEMLOG
 	int idx = MemoryLog(J_ON_ACCEPT, pPlayer->sessionId_);
 #endif
@@ -28,7 +27,7 @@ void JOB_ON_ACCEPT(WORD playerIdx, ID sessionId)
 void JOB_ON_RELEASE(WORD playerIdx)
 {
 	// 이미 RELEASE 된 플레이어에 대해서 다시한번 RELEASE JOB이 도착한것임
-	Player* pPlayer = g_playerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + playerIdx;
 #ifdef MEMLOG
 	int idx = MemoryLog(J_ON_RELEASE, pPlayer->sessionId_);
 #endif
@@ -48,7 +47,7 @@ void JOB_ON_RELEASE(WORD playerIdx)
 
 void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const WCHAR* pNickName, const char* pSessionKey)
 {
-	Player* pPlayer = g_playerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + playerIdx;
 	pPlayer->LastRecvedTime_ = GetTickCount64();
 	pPlayer->accountNo_ = AccountNo;
 	pPlayer->sectorX_ = pPlayer->sectorY_ = Player::INITIAL_SECTOR_VALUE;
@@ -63,7 +62,7 @@ void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const 
 
 void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD playerIdx)
 {
-	Player* pPlayer = g_playerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + playerIdx;
 	pPlayer->LastRecvedTime_ = GetTickCount64();
 
 	if (pPlayer->accountNo_ != accountNo)
@@ -93,7 +92,7 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 
 void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD playerIdx)
 {
-	Player* pPlayer = g_playerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + playerIdx;
 	pPlayer->LastRecvedTime_ = GetTickCount64();
 
 	// 디버깅용
@@ -112,5 +111,5 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 
 void CS_CHAT_REQ_HEARTBEAT(WORD playerIdx)
 {
-	g_playerArr[playerIdx].LastRecvedTime_ = GetTickCount64();
+	Player::pPlayerArr[playerIdx].LastRecvedTime_ = GetTickCount64();
 }

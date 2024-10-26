@@ -145,6 +145,7 @@
     <ClInclude Include="MemLog.h" />
     <ClInclude Include="NetServer.h" />
     <ClInclude Include="Packet.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="SCCContents.h" />

@@ -1,6 +1,17 @@
 #include <WinSock2.h>
 #include "CMessageQ.h"
 
+CMessageQ::CMessageQ()
+{
+		pTailForWorker_ = pHeadForWorker_ = packetPool_.Alloc();
+		pTailForSingle_ = pHeadForSingle_ = packetPool_.Alloc();
+#ifdef NO_LOCK
+		SWAP_GUARD = 0;
+#else
+		InitializeSRWLock(&SWAP_GUARD);
+#endif
+}
+
 void CMessageQ::Enqueue(Packet* data)
 {
 #ifdef NO_LOCK
@@ -81,4 +92,15 @@ void CMessageQ::Swap()
 #else
 	ReleaseSRWLockExclusive(&SWAP_GUARD);
 #endif
+}
+
+void CMessageQ::ClearAll()
+{
+	if (pTailForWorker_ != pHeadForWorker_)
+		__debugbreak();
+	if (pTailForSingle_ != pHeadForSingle_)
+		__debugbreak();
+
+	packetPool_.Free(pHeadForSingle_);
+	packetPool_.Free(pHeadForWorker_);
 }

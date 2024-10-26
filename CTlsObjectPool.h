@@ -7,7 +7,7 @@
 template<typename T,BOOL bPlacementNew>
 struct Bucket
 {
-	static constexpr int size = 500;
+	static constexpr int size = 1;
 	struct NODE
 	{
 		T data;
@@ -332,6 +332,21 @@ public:
 			InterlockedIncrement(&size_);
 			return;
 		}
+	}
+
+	// 메모리 누수 디버깅용, 서버 종료시에만 호출함
+	void ClearAll()
+	{
+		uintptr_t metaHead = metaHead_;
+		Bucket* pRealHead;
+		do
+		{
+			pRealHead = (Bucket*)CAddressTranslator::GetRealAddr(metaHead);
+			metaHead = pRealHead->metaNext;
+			::free(pRealHead);
+			InterlockedDecrement(&capacity_);
+			InterlockedDecrement(&size_);
+		} while (CAddressTranslator::GetRealAddr(metaHead) != 0);
 	}
 };
 #endif

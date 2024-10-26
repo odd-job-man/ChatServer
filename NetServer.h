@@ -7,7 +7,7 @@ class SmartPacket;
 class NetServer : public IHandler
 {
 public:
-	virtual BOOL Start(DWORD dwMaxSession);
+	virtual BOOL Start();
 	virtual void SendPacket(ID id, SmartPacket& sendPacket);
 	virtual BOOL OnConnectionRequest();
 	virtual void* OnAccept(ID id);
@@ -22,8 +22,12 @@ public:
 	static unsigned __stdcall IOCPWorkerThread(LPVOID arg);
 private:
 	// Accept
+	DWORD IOCP_WORKER_THREAD_NUM_;
 	LONG lSessionNum_ = 0;
-	LONG lMaxSession_;
+public:
+	LONG maxSession_;
+	LONG TIME_OUT_MILLISECONDS_;
+private:
 	ULONGLONG ullIdCounter = 0;
 	Session* pSessionArr_;
 	CLockFreeStack<short> DisconnectStack_;
