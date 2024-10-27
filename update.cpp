@@ -24,6 +24,13 @@ unsigned long long Update()
 	bool bStop = false;
 	while (true)
 	{
+		if (GetAsyncKeyState(VK_RETURN) & 0x01)
+		{
+			g_ChatServer.DisconnectAll();
+			bStop = true;
+			break;
+		}
+
 		SmartPacket sp = g_MQ.Dequeue();
 		if (sp.GetPacket() == nullptr)
 			break;
@@ -37,12 +44,6 @@ unsigned long long Update()
 			PacketProc_JOB(sp);
 		}
 
-		if (GetAsyncKeyState(VK_RETURN) & 0x01)
-		{
-			g_ChatServer.DisconnectAll();
-			bStop = true;
-			break;
-		}
 		++ret;
 	}
 

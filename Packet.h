@@ -8,6 +8,7 @@
 #include "IHandler.h"
 //#include "LanServer.h"
 #include "NetServer.h"
+extern NetServer g_ChatServer;
 
 #define QUEUE
 #include "CTlsObjectPool.h"
@@ -315,11 +316,17 @@ public:
 	Packet()
 #ifdef DEBUG_LEAK
 #ifndef DEBUG_LEAK_STD_LIST
-		:pDebugLink{ offsetof(Packet,pDebugLink) }
+		:pDebugLink{ offsetof(Packet,pDebugLink) },
+		logList_{ offsetof(LEAK_LOG,logListLink) }
 #endif
 #endif
 	{
 		pBuffer_ = new char[BUFFER_SIZE];
+#ifdef DEBUG_LEAK
+#ifndef DEBUG_LEAK_STD_LIST
+		InitializeCriticalSection(&cs_for_log_list_);
+#endif
+#endif
 	}
 #pragma warning(default : 26495)
 
@@ -437,14 +444,38 @@ public:
 	}
 
 #ifdef DEBUG_LEAK
+	enum LEAK_EVENT
+	{
+		ALLOC_CS_CHAT_REQ_MESSAGE,
+		SEND_PACKET,
+		SEND_ERROR,
+		SEND_PENDING_DISCONNECTED,
+		SMART_PACKET_DESTRUCTOR,
+		RELEASE_SESSION,
+		SEND_PROC,
+		WRITE_SEND_PACKET_ARR,
+	};
+	struct LEAK_LOG
+	{
+		LEAK_EVENT event;
+		int refCnt;
+		LINKED_NODE logListLink = offsetof(LEAK_LOG,logListLink);
+		Packet* pPacket;
+		Session* pSession;
+		ID sessionID;
+		int sendBufIndex;
+	};
 	char funcName_[100];
 	//// Start함수에서 초기화
 	static inline CRITICAL_SECTION cs_for_debug_leak;
+	CRITICAL_SECTION cs_for_log_list_;
+	CLinkedList logList_;
+	static inline CTlsObjectPool<LEAK_LOG, false> leakLogPool;
 #ifdef DEBUG_LEAK_STD_LIST
 	static inline std::list<Packet*> debugList;
 #else
 	LINKED_NODE pDebugLink;
-	static inline CLinkedList debugList{ 128 };
+	static inline CLinkedList debugList{ 200 };
 #endif
 
 	template<ServerType type>
@@ -464,7 +495,32 @@ public:
 		EnterCriticalSection(&cs_for_debug_leak);
 		debugList.remove(pPacket);
 		LeaveCriticalSection(&cs_for_debug_leak);
+
+		EnterCriticalSection(&pPacket->cs_for_log_list_);
+		LEAK_LOG* pLeakLog = (LEAK_LOG*)pPacket->logList_.GetFirst();
+		while (pLeakLog != nullptr)
+		{
+			LEAK_LOG* pTemp = pLeakLog;
+			pLeakLog = (LEAK_LOG*)pPacket->logList_.remove(pLeakLog);
+			Packet::leakLogPool.Free(pTemp);
+		}
+		LeaveCriticalSection(&pPacket->cs_for_log_list_);
 		packetPool_.Free(pPacket);
+	}
+
+	LEAK_LOG* WRITE_PACKET_LOG(LEAK_EVENT event, int refCnt, Session* pSession, ID sessionID, int sendBufIdx = -1)
+	{
+		LEAK_LOG* pLeakLog = leakLogPool.Alloc();
+		pLeakLog->event = event;
+		pLeakLog->refCnt = refCnt;
+		pLeakLog->pPacket = this;
+		pLeakLog->pSession = pSession;
+		pLeakLog->sessionID = sessionID;
+		pLeakLog->sendBufIndex = sendBufIdx;
+		EnterCriticalSection(&cs_for_log_list_);
+		logList_.push_back(pLeakLog);
+		LeaveCriticalSection(&cs_for_log_list_);
+		return pLeakLog;
 	}
 #endif
 	static inline CTlsObjectPool<Packet, false> packetPool_;
@@ -493,7 +549,9 @@ public:
 		if (pPacket_ == nullptr)
 			return;
 
-		if(pPacket_->DecrementRefCnt() == 0)
+		LONG refCnt = pPacket_->DecrementRefCnt();
+		Packet::LEAK_LOG* pLeakLog = pPacket_->WRITE_PACKET_LOG(Packet::SMART_PACKET_DESTRUCTOR, refCnt, nullptr, ID{ UINT64_MAX });
+		if(refCnt == 0)
 		{
 			PACKET_FREE(pPacket_);
 		}

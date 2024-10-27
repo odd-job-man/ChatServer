@@ -5,7 +5,6 @@ union ID
 };
 
 class Packet;
-
 struct Session
 {
 	static constexpr LONG RELEASE_FLAG = 0x80000000;
@@ -26,8 +25,4 @@ struct Session
 		return id.ullId & 0xFFFF;
 	}
 
-#ifdef IO_RET
-	ULONGLONG ullSend;
-	ULONGLONG ullRecv;
-#endif
 };

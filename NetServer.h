@@ -14,6 +14,8 @@ public:
 	virtual void OnRelease(ID id);
 	virtual void OnRecv(ID id, Packet* pPacket);
 	virtual void OnError(ID id, int errorType, Packet* pRcvdPacket);
+	// µð¹ö±ë¿ë
+	Session* GetSession(ID id);
 	void Monitoring(int updateCnt, unsigned long long BuffersProcessAtThisFrame);
 	void Disconnect(ID id);
 	void DisconnectAll();

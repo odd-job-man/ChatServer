@@ -94,6 +94,7 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 	}
 
 	SmartPacket sp = PACKET_ALLOC(Net);
+	sp->WRITE_PACKET_LOG(Packet::ALLOC_CS_CHAT_REQ_MESSAGE, sp->refCnt_, g_ChatServer.GetSession(pPlayer->sessionId_), pPlayer->sessionId_);
 	MAKE_CS_CHAT_RES_MESSAGE(accountNo, pPlayer->ID_, pPlayer->nickName_, messageLen, pMessage, sp);
 	SECTOR_AROUND sectorAround;
 	GetSectorAround(pPlayer->sectorX_, pPlayer->sectorY_, &sectorAround);
