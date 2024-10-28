@@ -13,7 +13,7 @@
 
 extern NetServer g_ChatServer;
 
-#define MYLIST_SECTOR
+//#define MYLIST_SECTOR
 struct SectorArray
 {
 #ifdef MYLIST_SECTOR

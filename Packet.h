@@ -29,7 +29,6 @@ enum ServerType
 	Lan
 };
 
-#define DEBUG_LEAK
 
 #ifdef DEBUG_LEAK
 #include <list>
@@ -549,9 +548,7 @@ public:
 		if (pPacket_ == nullptr)
 			return;
 
-		LONG refCnt = pPacket_->DecrementRefCnt();
-		Packet::LEAK_LOG* pLeakLog = pPacket_->WRITE_PACKET_LOG(Packet::SMART_PACKET_DESTRUCTOR, refCnt, nullptr, ID{ UINT64_MAX });
-		if(refCnt == 0)
+		if (pPacket_->DecrementRefCnt() == 0)
 		{
 			PACKET_FREE(pPacket_);
 		}

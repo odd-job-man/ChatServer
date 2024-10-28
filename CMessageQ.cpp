@@ -72,16 +72,11 @@ void CMessageQ::Swap()
 	AcquireSRWLockExclusive(&SWAP_GUARD);
 #endif
 
-	if (pHeadForSingle_ != pTailForSingle_)
-		__debugbreak();
-
 	// 더미노드
 	Node* pTemp = pTailForSingle_;
 	pTailForSingle_ = pTailForWorker_;
 	pHeadForSingle_ = pHeadForWorker_;
 	pTailForWorker_ = pHeadForWorker_ = pTemp;
-	if (pTailForWorker_ == nullptr)
-		__debugbreak();
 
 	unsigned long long BufferCntTemp;
 	BufferCntTemp = workerEnqueuedBufferCnt_;

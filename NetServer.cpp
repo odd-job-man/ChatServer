@@ -201,7 +201,6 @@ void NetServer::SendPacket(ID id, SmartPacket& sendPacket)
 	// ÀÎÄÚµù
 	sendPacket->SetHeader<Net>();
 	sendPacket->IncreaseRefCnt();
-	sendPacket->WRITE_PACKET_LOG(Packet::SEND_PACKET, sendPacket->refCnt_, pSession, id);
 	pSession->sendPacketQ_.Enqueue(sendPacket.GetPacket());
 	SendPost(pSession);
 	if (InterlockedDecrement(&pSession->IoCnt_) == 0)
@@ -306,6 +305,7 @@ void NetServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThi
 
 void NetServer::Disconnect(ID id)
 {
+	printf("Disconnect Called\n");
 	__debugbreak();
 	Session* pSession = pSessionArr_ + Session::GET_SESSION_INDEX(id);
 
@@ -523,7 +523,6 @@ BOOL NetServer::SendPost(Session* pSession)
 		Packet* pPacket = pSession->sendPacketQ_.Dequeue().value();
 		wsa[i].buf = (char*)pPacket->pBuffer_;
 		wsa[i].len = pPacket->GetUsedDataSize() + sizeof(Packet::NetHeader);
-		pPacket->WRITE_PACKET_LOG(Packet::WRITE_SEND_PACKET_ARR, pPacket->refCnt_, pSession, pSession->id_, i);
 		pSession->pSendPacketArr_[i] = pPacket;
 	}
 
@@ -545,14 +544,7 @@ BOOL NetServer::SendPost(Session* pSession)
 			return TRUE;
 		}
 
-		Packet* pPacket;
-		for (DWORD i = 0; i < dwBufferNum; ++i)
-		{
-			pPacket = pSession->pSendPacketArr_[i];
-			pPacket->WRITE_PACKET_LOG(Packet::SEND_ERROR, pPacket->refCnt_,pSession,pSession->id_);
-		}
-
-		InterlockedExchange((LONG*)&pSession->bSendingInProgress_, FALSE);
+		//InterlockedExchange((LONG*)&pSession->bSendingInProgress_, FALSE);
 		InterlockedDecrement(&(pSession->IoCnt_));
 
 		if (dwErrCode == WSAECONNRESET)
@@ -575,9 +567,7 @@ void NetServer::ReleaseSession(Session* pSession)
 	for (LONG i = 0; i < pSession->lSendBufNum_; ++i)
 	{
 		Packet* pPacket = pSession->pSendPacketArr_[i];
-		LONG refCnt = pPacket->DecrementRefCnt();
-		pPacket->WRITE_PACKET_LOG(Packet::RELEASE_SESSION, refCnt, pSession, pSession->id_);
-		if (refCnt == 0)
+		if (pPacket->DecrementRefCnt()  == 0)
 		{
 			PACKET_FREE(pPacket);
 		}
@@ -587,9 +577,7 @@ void NetServer::ReleaseSession(Session* pSession)
 	for (LONG i = 0; i < size; ++i)
 	{
 		Packet* pPacket = pSession->sendPacketQ_.Dequeue().value();
-		LONG refCnt = pPacket->DecrementRefCnt();
-		pPacket->WRITE_PACKET_LOG(Packet::RELEASE_SESSION, refCnt, pSession, pSession->id_);
-		if (refCnt == 0)
+		if (pPacket->DecrementRefCnt() == 0)
 		{
 			PACKET_FREE(pPacket);
 		}
@@ -654,9 +642,7 @@ void NetServer::SendProc(Session* pSession, DWORD dwNumberOfBytesTransferred)
 	for (LONG i = 0; i < sendBufNum; ++i)
 	{
 		Packet* pPacket = pSession->pSendPacketArr_[i];
-		LONG refCnt = pPacket->DecrementRefCnt();
-		pPacket->WRITE_PACKET_LOG(Packet::SEND_PROC, refCnt, pSession, pSession->id_);
-		if (refCnt == 0)
+		if (pPacket->DecrementRefCnt()  == 0)
 		{
 			PACKET_FREE(pPacket);
 		}

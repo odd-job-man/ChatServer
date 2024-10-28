@@ -15,7 +15,6 @@ void CLinkedList::push_back(void* pNewData)
 	if (pNewLink->offset_ != offset_)
 		__debugbreak();
 #endif
-
 	// 비어잇던 리스트에 들어가는 경우
 	if (pHead_ == nullptr)
 	{

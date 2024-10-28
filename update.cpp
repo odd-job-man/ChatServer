@@ -20,17 +20,9 @@ unsigned long long Update()
 	static unsigned long long firstTimeOutCheck = timeOutCheck;
 
 	g_MQ.Swap();
-	unsigned long long ret = 0;
-	bool bStop = false;
+	unsigned long long ret = g_MQ.BuffersToProcessThisFrame_;
 	while (true)
 	{
-		if (GetAsyncKeyState(VK_RETURN) & 0x01)
-		{
-			g_ChatServer.DisconnectAll();
-			bStop = true;
-			break;
-		}
-
 		SmartPacket sp = g_MQ.Dequeue();
 		if (sp.GetPacket() == nullptr)
 			break;
@@ -43,25 +35,6 @@ unsigned long long Update()
 		{
 			PacketProc_JOB(sp);
 		}
-
-		++ret;
-	}
-
-	if (bStop)
-	{
-		// 메시지 큐 비우기
-		Packet* pPacket;
-		while ((pPacket = g_MQ.Dequeue()) != nullptr)
-		{
-			PACKET_FREE(pPacket);
-		}
-		g_MQ.Swap();
-		while ((pPacket = g_MQ.Dequeue()) != nullptr)
-		{
-			PACKET_FREE(pPacket);
-		}
-		g_ChatServer.Stop();
-		return -1;
 	}
 
 	unsigned long long currentTime = GetTickCount64();

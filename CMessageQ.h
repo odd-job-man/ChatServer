@@ -2,6 +2,8 @@
 #include <cstdint>
 #include "CAddressTranslator.h"
 #include "Packet.h"
+
+#define NO_LOCK
 class CMessageQ
 {
 public:

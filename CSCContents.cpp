@@ -13,6 +13,7 @@ void JOB_ON_ACCEPT(WORD playerIdx, ID sessionId)
 		MEMORY_LOG_WRITE_TO_FILE(MEMORY_LOG(J_ON_ACCEPT,pPlayer->sessionId_));
 		__debugbreak();
 	}
+
 	pPlayer->LastRecvedTime_ = GetTickCount64();
 	pPlayer->bUsing_ = true;
 	pPlayer->sessionId_ = sessionId;
@@ -28,19 +29,29 @@ void JOB_ON_RELEASE(WORD playerIdx)
 		__debugbreak();
 	}
 
-	if (pPlayer->sectorX_ != Player::INITIAL_SECTOR_VALUE && pPlayer->sectorY_ != Player::INITIAL_SECTOR_VALUE)
-		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
-
 	pPlayer->bUsing_ = false;
-	--g_ChatServer.lPlayerNum;
+	// 로그인햇다면 이미 이동 메시지를 보내고 등록된 좌표에 해당하는 섹터에 등록햇을것이므로 삭제한다.
+	if (pPlayer->bLogin_ == true)
+	{
+		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
+		pPlayer->bLogin_ = false;
+		--g_ChatServer.lPlayerNum;
+	}
 }
 
 void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const WCHAR* pNickName, const char* pSessionKey)
 {
+	// 플레이어수가 일정수 넘어가면 로그인 실패시킴
 	Player* pPlayer = Player::pPlayerArr + playerIdx;
+	if (g_ChatServer.lPlayerNum >= Player::MAX_PLAYER_NUM)
+	{
+		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		return;
+	}
 	pPlayer->LastRecvedTime_ = GetTickCount64();
 	pPlayer->accountNo_ = AccountNo;
-	pPlayer->sectorX_ = pPlayer->sectorY_ = Player::INITIAL_SECTOR_VALUE;
+	pPlayer->bLogin_ = true;
+	pPlayer->bInitialMove_ = true;
 
 	wcscpy_s(pPlayer->ID_, Player::ID_LEN, pID);
 	wcscpy_s(pPlayer->nickName_, Player::NICK_NAME_LEN, pNickName);
@@ -61,7 +72,7 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 		g_ChatServer.Disconnect(pPlayer->sessionId_);
 		return;
 	}
-
+	
 	// 클라가 유효하지 않은 좌표로 요청햇다면 끊어버린다
 	if (isNonValidSector(sectorX, sectorY))
 	{
@@ -69,7 +80,9 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 		return;
 	}
 
-	if (pPlayer->sectorX_ != Player::INITIAL_SECTOR_VALUE && pPlayer->sectorY_ != Player::INITIAL_SECTOR_VALUE)
+	if (pPlayer->bInitialMove_ == true)
+		pPlayer->bInitialMove_ = false;
+	else
 		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
 
 	pPlayer->sectorX_ = sectorX;
@@ -94,7 +107,6 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 	}
 
 	SmartPacket sp = PACKET_ALLOC(Net);
-	sp->WRITE_PACKET_LOG(Packet::ALLOC_CS_CHAT_REQ_MESSAGE, sp->refCnt_, g_ChatServer.GetSession(pPlayer->sessionId_), pPlayer->sessionId_);
 	MAKE_CS_CHAT_RES_MESSAGE(accountNo, pPlayer->ID_, pPlayer->nickName_, messageLen, pMessage, sp);
 	SECTOR_AROUND sectorAround;
 	GetSectorAround(pPlayer->sectorX_, pPlayer->sectorY_, &sectorAround);

@@ -36,21 +36,20 @@ int main()
 	g_iFPS = 0;
 	g_iFpsCheck = g_iOldFrameTick;
 
+	unsigned long long sum = 0;
 	while (true)
 	{
-		unsigned long long ProcessBufferPerFrame = Update();
-		if (ProcessBufferPerFrame == -1)
-			break;
-
+		sum += Update();
 		g_iTime = timeGetTime();
 		++g_iFPS;
 		// 프레임 밀렷을때 
 		if (g_iTime - g_iFpsCheck >= 1000)
 		{
 			printf("FPS : %d\n", g_iFPS);
-			g_ChatServer.Monitoring(g_iFPS, ProcessBufferPerFrame);
+			g_ChatServer.Monitoring(g_iFPS, sum);
 			g_iFPS = 0;
 			g_iFpsCheck += 1000;
+			sum = 0;
 		}
 
 		if (g_iTime - g_iOldFrameTick >= TICK_PER_FRAME)

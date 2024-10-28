@@ -11,6 +11,8 @@ struct Player
 	static constexpr int INITIAL_SECTOR_VALUE = 51;
 
 	bool bUsing_;
+	bool bLogin_;
+	bool bInitialMove_;
 	LINKED_NODE sectorLink;
 	ID sessionId_;
 	WORD sectorX_;
@@ -22,7 +24,7 @@ struct Player
 	// 좀 애매함
 
 	Player()
-		:sectorLink{ offsetof(Player,sectorLink) },bUsing_{false}
+		:sectorLink{ offsetof(Player,sectorLink) }, bUsing_{ false }, bLogin_{ false }, bInitialMove_{ false }
 	{}
 
 	static WORD MAKE_PLAYER_INDEX(ID sessionId)
