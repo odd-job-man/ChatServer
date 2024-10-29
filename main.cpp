@@ -47,6 +47,7 @@ int main()
 		{
 			printf("FPS : %d\n", g_iFPS);
 			g_ChatServer.Monitoring(g_iFPS, sum);
+			printf("Press F1 To Disconnect All And Terminate Server!\n");
 			g_iFPS = 0;
 			g_iFpsCheck += 1000;
 			sum = 0;
@@ -57,6 +58,14 @@ int main()
 			g_iOldFrameTick = g_iTime - ((g_iTime - g_iFirst) % TICK_PER_FRAME);
 			continue;
 		}
+
+		if (GetAsyncKeyState(VK_F1) & 0x01)
+		{
+			g_ChatServer.DisconnectAll();
+			printf("Disconnect All");
+			break;
+		}
+
 		Sleep(TICK_PER_FRAME - (g_iTime - g_iOldFrameTick));
 		g_iOldFrameTick += TICK_PER_FRAME;
 	}
