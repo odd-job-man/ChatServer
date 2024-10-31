@@ -13,10 +13,11 @@ void JOB_ON_ACCEPT(WORD playerIdx, ID sessionId)
 		MEMORY_LOG_WRITE_TO_FILE(MEMORY_LOG(J_ON_ACCEPT,pPlayer->sessionId_));
 		__debugbreak();
 	}
-
-	pPlayer->LastRecvedTime_ = GetTickCount64();
 	pPlayer->bUsing_ = true;
+	pPlayer->bLogin_ = false;
+	pPlayer->bRegisterAtSector_ = false;
 	pPlayer->sessionId_ = sessionId;
+	pPlayer->LastRecvedTime_ = GetTickCount64();
 }
 
 void JOB_ON_RELEASE(WORD playerIdx)
@@ -33,8 +34,8 @@ void JOB_ON_RELEASE(WORD playerIdx)
 	// 로그인햇다면 이미 이동 메시지를 보내고 등록된 좌표에 해당하는 섹터에 등록햇을것이므로 삭제한다.
 	if (pPlayer->bLogin_ == true)
 	{
-		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
-		pPlayer->bLogin_ = false;
+		if (pPlayer->bRegisterAtSector_ == true)
+			RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
 		--g_ChatServer.lPlayerNum;
 	}
 }
@@ -51,7 +52,6 @@ void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const 
 	pPlayer->LastRecvedTime_ = GetTickCount64();
 	pPlayer->accountNo_ = AccountNo;
 	pPlayer->bLogin_ = true;
-	pPlayer->bInitialMove_ = true;
 
 	wcscpy_s(pPlayer->ID_, Player::ID_LEN, pID);
 	wcscpy_s(pPlayer->nickName_, Player::NICK_NAME_LEN, pNickName);
@@ -74,14 +74,14 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 	}
 	
 	// 클라가 유효하지 않은 좌표로 요청햇다면 끊어버린다
-	if (isNonValidSector(sectorX, sectorY))
+	if (IsNonValidSector(sectorX, sectorY))
 	{
 		g_ChatServer.Disconnect(pPlayer->sessionId_);
 		return;
 	}
 
-	if (pPlayer->bInitialMove_ == true)
-		pPlayer->bInitialMove_ = false;
+	if (pPlayer->bRegisterAtSector_ == false)
+		pPlayer->bRegisterAtSector_ = true;
 	else
 		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
 
@@ -110,6 +110,7 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 	MAKE_CS_CHAT_RES_MESSAGE(accountNo, pPlayer->ID_, pPlayer->nickName_, messageLen, pMessage, sp);
 	SECTOR_AROUND sectorAround;
 	GetSectorAround(pPlayer->sectorX_, pPlayer->sectorY_, &sectorAround);
+	++g_ChatServer.REQ_MESSAGE_TPS;
 	SendPacket_AROUND(&sectorAround, sp);
 }
 

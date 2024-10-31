@@ -283,24 +283,30 @@ void NetServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThi
 		"Recv Msg TPS: %d\n"
 		"Send Msg TPS: %d\n"
 		"Session Num : %d\n"
-		"Player Num : %d\n\n",
+		"Player Num : %d\n"
+		"REQ_MESSAGE_TPS : %d\n"
+		"RES_MESSAGE_TPS : %d\n\n",
 		BuffersProcessAtThisFrame,
-		Packet::packetPool_.capacity_, 
+		Packet::packetPool_.capacity_,
 		g_MQ.packetPool_.capacity_,
-		g_MQ.workerEnqueuedBufferCnt_ ,
+		g_MQ.workerEnqueuedBufferCnt_,
 		pSessionArr_[0].sendPacketQ_.nodePool_.capacity_,
 		lAcceptTotal_ - lAcceptTotal_PREV,
 		lAcceptTotal_,
-		lDisconnectTPS_, 
+		lDisconnectTPS_,
 		lRecvTPS_,
 		lSendTPS_,
-		lSessionNum_, 
-		lPlayerNum);
+		lSessionNum_,
+		lPlayerNum,
+		REQ_MESSAGE_TPS,
+		RES_MESSAGE_TPS);
 
 	lAcceptTotal_PREV = lAcceptTotal_;
 	InterlockedExchange(&lDisconnectTPS_, 0);
 	InterlockedExchange(&lRecvTPS_, 0);
 	InterlockedExchange(&lSendTPS_, 0);
+	REQ_MESSAGE_TPS = 0;
+	RES_MESSAGE_TPS = 0;
 }
 
 void NetServer::Disconnect(ID id)
@@ -387,17 +393,27 @@ void NetServer::Stop()
 	pSessionArr_[0].sendPacketQ_.nodePool_.ClearAll();
 	//delete[] pSessionArr_;
 
-	// 직렬화 버퍼 풀 비우기
-	Packet::packetPool_.ClearAll();
 
 	// DisconnectStack 비우기
 	while (DisconnectStack_.Pop().has_value());
 	// DisconnectStack 풀 비우기
 	DisconnectStack_.pool_.ClearAll();
 
+	g_MQ.Swap();
+	while (true)
+	{
+		Packet* pPacket = g_MQ.Dequeue();
+		if (pPacket == nullptr)
+			break;
+		PACKET_FREE(pPacket);
+	}
+
 	g_MQ.ClearAll();
 	// 메시지 큐의 노드 풀 비우기
 	g_MQ.packetPool_.ClearAll();
+
+	// 직렬화 버퍼 풀 비우기
+	Packet::packetPool_.ClearAll();
 
 	printf(
 		"SerializeBuffer Pool Capacity : %d\n"
@@ -435,24 +451,24 @@ void NetServer::Stop()
 		pPacket = Packet::debugList.GetNext(pPacket);
 	}
 
-	Packet::LEAK_LOG*** ppLL = new Packet::LEAK_LOG * *[size];
-	size_t* logLenArr = new size_t[size];
+	//Packet::LEAK_LOG*** ppLL = new Packet::LEAK_LOG * *[size];
+	//size_t* logLenArr = new size_t[size];
 
-	Packet* pLeakPacket = (Packet*)Packet::debugList.GetFirst();
-	for (size_t i = 0; i < size; ++i)
-	{
-		ppLL[i] = new Packet::LEAK_LOG * [pLeakPacket->logList_.size_];
-		logLenArr[i] = pLeakPacket->logList_.size_;
+	//Packet* pLeakPacket = (Packet*)Packet::debugList.GetFirst();
+	//for (size_t i = 0; i < size; ++i)
+	//{
+	//	ppLL[i] = new Packet::LEAK_LOG * [pLeakPacket->logList_.size_];
+	//	logLenArr[i] = pLeakPacket->logList_.size_;
 
-		Packet::LEAK_LOG* pLL = (Packet::LEAK_LOG*)pLeakPacket->logList_.GetFirst();
-		for (size_t j = 0; j < pLeakPacket->logList_.size_; ++j)
-		{
-			ppLL[i][j] = pLL;
-			pLL = (Packet::LEAK_LOG*)pLeakPacket->logList_.GetNext(pLL);
-		}
-		pLeakPacket = (Packet*)Packet::debugList.GetNext(pLeakPacket);
-	}
-	__debugbreak();
+	//	Packet::LEAK_LOG* pLL = (Packet::LEAK_LOG*)pLeakPacket->logList_.GetFirst();
+	//	for (size_t j = 0; j < pLeakPacket->logList_.size_; ++j)
+	//	{
+	//		ppLL[i][j] = pLL;
+	//		pLL = (Packet::LEAK_LOG*)pLeakPacket->logList_.GetNext(pLL);
+	//	}
+	//	pLeakPacket = (Packet*)Packet::debugList.GetNext(pLeakPacket);
+	//}
+	//__debugbreak();
 #endif
 }
 

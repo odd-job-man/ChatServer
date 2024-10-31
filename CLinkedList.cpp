@@ -101,4 +101,18 @@ void* CLinkedList::GetFirst()
 	return (char*)pHead_ - offset_;
 }
 
+int CLinkedList::FindElementNum(void* pElement)
+{
+	int ret = 0;
+	void* pTarget = GetFirst();
+	while (pTarget != nullptr)
+	{
+		if (pTarget == pElement)
+			++ret;
+
+		pTarget = GetNext(pTarget);
+	}
+	return ret;
+}
+
 

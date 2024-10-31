@@ -16,13 +16,13 @@ struct SECTOR_AROUND
 	BYTE sectorCount;
 };
 
-void GetSectorAround(WORD sectorX, WORD sectorY, SECTOR_AROUND* pOutSectorAround);
+void GetSectorAround(SHORT sectorX, SHORT sectorY, SECTOR_AROUND* pOutSectorAround);
 void SendPacket_AROUND(SECTOR_AROUND* pSectorAround, SmartPacket& sp);
 void RegisterClientAtSector(WORD sectorX, WORD sectorY, Player* pPlayer);
 void RemoveClientAtSector(WORD sectorX, WORD sectorY, Player* pPlayer);
 //void DebugForSectorProb(Player* pPlayer);
 
-__forceinline bool isNonValidSector(WORD sectorX, WORD sectorY)
+__forceinline bool IsNonValidSector(WORD sectorX, WORD sectorY)
 {
 	return !((0 <= sectorX) && (sectorX <= NUM_OF_SECTOR_VERTICAL)) && ((0 <= sectorY) && (sectorY <= NUM_OF_SECTOR_HORIZONTAL));
 }

@@ -11,7 +11,7 @@ struct LINKED_NODE
 class CLinkedList
 {
 public:
-	size_t size_ = 0;
+	int size_ = 0;
 	const int offset_;
 	LINKED_NODE* pHead_;
 	LINKED_NODE* pTail_;
@@ -20,6 +20,7 @@ public:
 	void* remove(void* pVictim);
 	void* GetNext(void* pCur);
 	void* GetFirst();
+	int FindElementNum(void* pElement);
 	__forceinline size_t size()
 	{
 		return size_;

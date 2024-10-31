@@ -63,6 +63,7 @@ int main()
 		{
 			g_ChatServer.DisconnectAll();
 			printf("Disconnect All");
+			//g_ChatServer.Stop();
 			break;
 		}
 

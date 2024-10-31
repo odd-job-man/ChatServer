@@ -14,6 +14,7 @@ extern NetServer g_ChatServer;
 #include "CTlsObjectPool.h"
 
 
+//#define DEBUG_LEAK
 
 using NET_HEADER = short;
 

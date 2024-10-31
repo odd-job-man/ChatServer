@@ -36,24 +36,23 @@ unsigned long long Update()
 			PacketProc_JOB(sp);
 		}
 	}
-
 	unsigned long long currentTime = GetTickCount64();
 	// 3초에 한번씩 타임아웃 체크함(우선 하드코딩)
-	if (currentTime - timeOutCheck <= 30000)
-		return ret;
+	//if (currentTime - timeOutCheck <= 30000)
+	//	return ret;
 
-	for (int i = 0; i < g_ChatServer.maxSession_; ++i)
-	{
-		Player* pPlayer = Player::pPlayerArr + i;
-		if (pPlayer->bUsing_ == false)
-			continue;
+	//for (int i = 0; i < g_ChatServer.maxSession_; ++i)
+	//{
+	//	Player* pPlayer = Player::pPlayerArr + i;
+	//	if (pPlayer->bUsing_ == false)
+	//		continue;
 
-		//40초 지나면 타임 아웃 처리
-		if (currentTime - pPlayer->LastRecvedTime_ > g_ChatServer.TIME_OUT_MILLISECONDS_)
-			g_ChatServer.Disconnect(pPlayer->sessionId_);
-	}
+	//	//40초 지나면 타임 아웃 처리
+	//	if (currentTime - pPlayer->LastRecvedTime_ > g_ChatServer.TIME_OUT_MILLISECONDS_)
+	//		g_ChatServer.Disconnect(pPlayer->sessionId_);
+	//}
 
-	timeOutCheck += timeOutCheck - ((timeOutCheck - firstTimeOutCheck) % 30000);
+	//timeOutCheck += timeOutCheck - ((timeOutCheck - firstTimeOutCheck) % 30000);
 	return ret;
 }
 

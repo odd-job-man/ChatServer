@@ -13,7 +13,7 @@
 
 extern NetServer g_ChatServer;
 
-//#define MYLIST_SECTOR
+#define MYLIST_SECTOR
 struct SectorArray
 {
 #ifdef MYLIST_SECTOR
@@ -36,7 +36,7 @@ struct SectorArray
 
 
 
-void GetSectorAround(WORD sectorX, WORD sectorY, SECTOR_AROUND* pOutSectorAround)
+void GetSectorAround(SHORT sectorX, SHORT sectorY, SECTOR_AROUND* pOutSectorAround)
 {
 
 	pOutSectorAround->sectorCount = 0;
@@ -123,6 +123,7 @@ void SendPacket_AROUND(SECTOR_AROUND* pSectorAround, SmartPacket& sp)
 		{
 			g_ChatServer.SendPacket(((Player*)pPlayer)->sessionId_, sp);
 			pPlayer = pList->GetNext(pPlayer);
+			++g_ChatServer.RES_MESSAGE_TPS;
 		}
 	}
 #else
@@ -131,6 +132,7 @@ void SendPacket_AROUND(SECTOR_AROUND* pSectorAround, SmartPacket& sp)
 		for (void* player : sectors.listArr[pSectorAround->Around[i].sectorY][pSectorAround->Around[i].sectorX])
 		{
 			g_ChatServer.SendPacket(((Player*)player)->sessionId_, sp);
+			++g_ChatServer.RES_MESSAGE_TPS;
 		}
 	}
 #endif

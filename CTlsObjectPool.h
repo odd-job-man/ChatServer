@@ -7,7 +7,7 @@
 template<typename T,BOOL bPlacementNew>
 struct Bucket
 {
-	static constexpr int size = 1000;
+	static constexpr int size = 100;
 	struct NODE
 	{
 		T data;

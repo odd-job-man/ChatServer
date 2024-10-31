@@ -27,6 +27,8 @@ private:
 	DWORD IOCP_WORKER_THREAD_NUM_;
 	LONG lSessionNum_ = 0;
 public:
+	LONG REQ_MESSAGE_TPS = 0;
+	LONG RES_MESSAGE_TPS = 0;
 	LONG maxSession_;
 	LONG TIME_OUT_MILLISECONDS_;
 private:
