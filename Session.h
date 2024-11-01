@@ -22,5 +22,4 @@ struct Session
 	{
 		return id & 0xFFFF;
 	}
-
 };
