@@ -1,16 +1,13 @@
-#include <WinSock2.h>
 #include <windows.h>
-#include "CLockFreeQueue.h"
-#include "RingBuffer.h"
-#include "Session.h"
 #include "Player.h"
 #include <cstdio>
 #include "MemLog.h"
+#define MEMLOG
 #ifdef MEMLOG
 unsigned long long g_Counter;
 MemLog g_MemLog[ARRAY_SIZE];
 
-int MemoryLog(EVENT event, ID sessionID)
+int MemoryLog(EVENT event, ULONGLONG sessionID)
 {
 	unsigned long long Cnt = InterlockedIncrement(&g_Counter) - 1;
 	int idx = Cnt % ARRAY_SIZE;
@@ -18,7 +15,7 @@ int MemoryLog(EVENT event, ID sessionID)
 	pElement->event = event;
 	pElement->Cnt = Cnt;
 	pElement->threadId = GetCurrentThreadId();
-	pElement->sessionID = sessionID.ullId;
+	pElement->sessionID = sessionID;
 	pElement->PlayerId = Player::MAKE_PLAYER_INDEX(sessionID);
 	return idx;
 }

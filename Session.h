@@ -1,15 +1,13 @@
 #pragma once
-union ID
-{
-	ULONGLONG ullId;
-};
+#include "Packet.h"
+#include "RingBuffer.h"
 
 class Packet;
 struct Session
 {
 	static constexpr LONG RELEASE_FLAG = 0x80000000;
 	SOCKET sock_;
-	ID id_;
+	ULONGLONG id_;
 	LONG lSendBufNum_;
 	bool bDisconnectCalled_;
 	WSAOVERLAPPED recvOverlapped;
@@ -20,9 +18,9 @@ struct Session
 	Packet* pSendPacketArr_[50];
 	RingBuffer recvRB_;
 	BOOL Init(SOCKET clientSock, ULONGLONG ullClientID, SHORT shIdx);
-	inline static short GET_SESSION_INDEX(ID id)
+	inline static short GET_SESSION_INDEX(ULONGLONG id)
 	{
-		return id.ullId & 0xFFFF;
+		return id & 0xFFFF;
 	}
 
 };

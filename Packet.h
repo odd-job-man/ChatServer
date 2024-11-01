@@ -2,10 +2,7 @@
 #include <memory.h>
 #include "CLockFreeQueue.h"
 #include <stddef.h>
-#include "CLockFreeStack.h"
-#include "RingBuffer.h"
 #include "Session.h"
-#include "IHandler.h"
 //#include "LanServer.h"
 #include "NetServer.h"
 extern NetServer g_ChatServer;

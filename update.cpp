@@ -4,9 +4,7 @@
 #include "CMessageQ.h"
 #include "Packet.h"
 #include "Player.h"
-#include "SCCContents.h"
 #include "CSCContents.h"
-#include "Logger.h"
 #include "ErrType.h"
 extern CMessageQ g_MQ;
 extern NetServer g_ChatServer;

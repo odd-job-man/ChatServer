@@ -1,4 +1,5 @@
 #pragma once
+#include "IHandler.h"
 #include "CLockFreeStack.h"
 
 class Stack;
@@ -8,16 +9,16 @@ class NetServer : public IHandler
 {
 public:
 	virtual BOOL Start();
-	virtual void SendPacket(ID id, SmartPacket& sendPacket);
+	virtual void SendPacket(ULONGLONG id, SmartPacket& sendPacket);
 	virtual BOOL OnConnectionRequest();
-	virtual void* OnAccept(ID id);
-	virtual void OnRelease(ID id);
-	virtual void OnRecv(ID id, Packet* pPacket);
-	virtual void OnError(ID id, int errorType, Packet* pRcvdPacket);
+	virtual void* OnAccept(ULONGLONG id);
+	virtual void OnRelease(ULONGLONG id);
+	virtual void OnRecv(ULONGLONG id, Packet* pPacket);
+	virtual void OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket);
 	// µð¹ö±ë¿ë
-	Session* GetSession(ID id);
+	Session* GetSession(ULONGLONG id);
 	void Monitoring(int updateCnt, unsigned long long BuffersProcessAtThisFrame);
-	void Disconnect(ID id);
+	void Disconnect(ULONGLONG id);
 	void DisconnectAll();
 	virtual void Stop();
 	static unsigned __stdcall AcceptThread(LPVOID arg);

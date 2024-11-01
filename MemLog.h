@@ -22,7 +22,7 @@ struct MemLog
 
 constexpr int ARRAY_SIZE = 5000000;
 
-int MemoryLog(EVENT event, ID sessionID);
+int MemoryLog(EVENT event, ULONGLONG sessionID);
 void MemLogWriteToFile(int lastIdx);
 void MemLogRead(MemLog* memLogBuffer, unsigned long long* pOutCounter, int* pOutLastIdx);
 

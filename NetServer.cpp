@@ -2,11 +2,9 @@
 #include <WS2tcpip.h>
 #include <windows.h>
 #include <process.h>
-#include <stdio.h>
 #include "CLockFreeQueue.h"
 #include "RingBuffer.h"
 #include "Session.h"
-#include "IHandler.h"
 #include "NetServer.h"
 #include "Logger.h"
 #include "Packet.h"
@@ -168,10 +166,10 @@ BOOL NetServer::Start()
 	}
 	LOG(L"ONOFF", SYSTEM, TEXTFILE, L"MAKE AccpetThread OK!");
 	Player::pPlayerArr = new Player[maxSession_];
-	return 0;
+	return TRUE;
 }
 
-void NetServer::SendPacket(ID id, SmartPacket& sendPacket)
+void NetServer::SendPacket(ULONGLONG id, SmartPacket& sendPacket)
 {
 	Session* pSession = pSessionArr_ + Session::GET_SESSION_INDEX(id);
 	long IoCnt = InterlockedIncrement(&pSession->IoCnt_);
@@ -188,7 +186,7 @@ void NetServer::SendPacket(ID id, SmartPacket& sendPacket)
 	}
 
 	// RELEASE 완료후 다시 세션에 대한 초기화가 완료된경우 즉 재활용
-	if (id.ullId != pSession->id_.ullId)
+	if (id != pSession->id_)
 	{
 		if (InterlockedDecrement(&pSession->IoCnt_) == 0)
 		{
@@ -218,18 +216,18 @@ BOOL NetServer::OnConnectionRequest()
 	return TRUE;
 }
 
-void* NetServer::OnAccept(ID id)
+void* NetServer::OnAccept(ULONGLONG id)
 {
 	Packet* pPacket = PACKET_ALLOC(Net);
 	pPacket->playerIdx_ = Player::MAKE_PLAYER_INDEX(id);
 	pPacket->recvType_ = JOB;
-	*pPacket << (WORD)en_JOB_ON_ACCEPT << id.ullId;
+	*pPacket << (WORD)en_JOB_ON_ACCEPT << id;
 	MEMORY_LOG(ON_ACCEPT, id);
 	g_MQ.Enqueue(pPacket);
 	return nullptr;
 }
 
-void NetServer::OnRelease(ID id)
+void NetServer::OnRelease(ULONGLONG id)
 {
 	Packet* pPacket = PACKET_ALLOC(Net);
 	pPacket->playerIdx_ = Session::GET_SESSION_INDEX(id);
@@ -239,14 +237,14 @@ void NetServer::OnRelease(ID id)
 	g_MQ.Enqueue(pPacket);
 }
 
-void NetServer::OnRecv(ID id, Packet* pPacket)
+void NetServer::OnRecv(ULONGLONG id, Packet* pPacket)
 {
 	pPacket->playerIdx_ = Player::MAKE_PLAYER_INDEX(id);
 	pPacket->recvType_ = RECVED_PACKET;
 	g_MQ.Enqueue(pPacket);
 }
 
-void NetServer::OnError(ID id, int errorType, Packet* pRcvdPacket)
+void NetServer::OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket)
 {
 	switch ((ErrType)errorType)
 	{
@@ -264,7 +262,7 @@ void NetServer::OnError(ID id, int errorType, Packet* pRcvdPacket)
 	}
 }
 
-Session* NetServer::GetSession(ID id)
+Session* NetServer::GetSession(ULONGLONG id)
 {
 	return pSessionArr_ + Session::GET_SESSION_INDEX(id);
 }
@@ -309,7 +307,7 @@ void NetServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThi
 	RES_MESSAGE_TPS = 0;
 }
 
-void NetServer::Disconnect(ID id)
+void NetServer::Disconnect(ULONGLONG id)
 {
 	printf("Disconnect Called\n");
 	__debugbreak();
@@ -328,7 +326,7 @@ void NetServer::Disconnect(ID id)
 	}
 
 	// RELEASE후 재활용까지 되엇을때
-	if (id.ullId != pSession->id_.ullId)
+	if (id != pSession->id_)
 	{
 		if (InterlockedDecrement(&pSession->IoCnt_) == 0)
 		{

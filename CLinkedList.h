@@ -1,5 +1,4 @@
 #pragma once
-#include <iterator>
 struct LINKED_NODE
 {
 	const int offset_;

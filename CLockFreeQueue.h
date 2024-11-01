@@ -5,7 +5,6 @@
 #include "CAddressTranslator.h"
 #define QUEUE
 #include "CTlsObjectPool.h"
-#include "CLockFreeObjectPool.h"
 
 
 template <typename T>

@@ -1,5 +1,4 @@
 #pragma once
-#include <list>
 #include "Player.h"
 
 static constexpr auto NUM_OF_SECTOR_VERTICAL = 50;

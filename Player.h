@@ -17,7 +17,7 @@ struct Player
 	WORD sectorX_;
 	WORD sectorY_;
 	LINKED_NODE sectorLink;
-	ID sessionId_;
+	ULONGLONG sessionId_;
 	INT64 accountNo_;
 	ULONGLONG LastRecvedTime_;
 	WCHAR ID_[ID_LEN];
@@ -27,8 +27,8 @@ struct Player
 		:sectorLink{ offsetof(Player,sectorLink) }, bUsing_{ false }, bLogin_{ false }, bRegisterAtSector_{ false }
 	{}
 
-	static WORD MAKE_PLAYER_INDEX(ID sessionId)
+	static WORD MAKE_PLAYER_INDEX(ULONGLONG sessionId)
 	{
-		return sessionId.ullId & 0xFFFF;
+		return sessionId & 0xFFFF;
 	}
 };

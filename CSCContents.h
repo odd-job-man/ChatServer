@@ -3,7 +3,7 @@
 #include "Player.h"
 #include "SCCContents.h"
 
-void JOB_ON_ACCEPT(WORD playerIdx, ID sessionId);
+void JOB_ON_ACCEPT(WORD playerIdx, ULONGLONG sessionId);
 void JOB_ON_RELEASE(WORD playerIdx);
 void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const WCHAR* pNickName, const char* pSessionKey);
 void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD playerIdx);
@@ -12,8 +12,8 @@ void CS_CHAT_REQ_HEARTBEAT(WORD playerIdx);
 
 __forceinline void JOB_ON_ACCEPT_RECV(SmartPacket& sp)
 {
-	ID sessionId;
-	*sp >> sessionId.ullId;
+	ULONGLONG sessionId;
+	*sp >> sessionId;
 	JOB_ON_ACCEPT(sp->playerIdx_, sessionId);
 }
 

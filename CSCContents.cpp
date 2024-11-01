@@ -4,7 +4,7 @@
 #include "MemLog.h"
 NetServer g_ChatServer;
 
-void JOB_ON_ACCEPT(WORD playerIdx, ID sessionId)
+void JOB_ON_ACCEPT(WORD playerIdx, ULONGLONG sessionId)
 {
 	// 이미 true라는 이야기는 이중 ON_ACCEPT임
 	Player* pPlayer = Player::pPlayerArr + playerIdx;
