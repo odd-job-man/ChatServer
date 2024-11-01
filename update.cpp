@@ -6,8 +6,10 @@
 #include "Player.h"
 #include "CSCContents.h"
 #include "ErrType.h"
-extern CMessageQ g_MQ;
-extern NetServer g_ChatServer;
+#include "ChatServer.h"
+
+CMessageQ g_MQ;
+extern ChatServer g_ChatServer;
 
 bool PacketProc_PACKET(SmartPacket& sp);
 bool PacketProc_JOB(SmartPacket& sp);

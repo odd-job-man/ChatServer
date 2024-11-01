@@ -2,7 +2,9 @@
 #include "CSCContents.h"
 #include "Sector.h"
 #include "MemLog.h"
-NetServer g_ChatServer;
+#include "ChatServer.h"
+
+extern ChatServer g_ChatServer;
 
 void JOB_ON_ACCEPT(WORD playerIdx, ULONGLONG sessionId)
 {

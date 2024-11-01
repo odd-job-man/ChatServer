@@ -5,10 +5,10 @@
 #include "Sector.h"
 #include "Player.h"
 
-#include "NetServer.h"
+#include "ChatServer.h"
 #include "Logger.h"
 
-extern NetServer g_ChatServer;
+extern ChatServer g_ChatServer;
 
 #define MYLIST_SECTOR
 struct SectorArray

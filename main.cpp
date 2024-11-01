@@ -1,7 +1,9 @@
 #include <WinSock2.h>
 #include <time.h>
 #include <stdio.h>
-#include "NetServer.h"
+
+#include "ChatServer.h"
+
 #pragma comment(lib,"Winmm.lib")
 
 int g_iOldFrameTick;
@@ -13,7 +15,7 @@ int g_iFirst;
 constexpr int TICK_PER_FRAME = 40;
 constexpr int FRAME_PER_SECONDS = (1000) / TICK_PER_FRAME;
 
-extern NetServer g_ChatServer;
+extern ChatServer g_ChatServer;
 
 unsigned long long Update();
 
@@ -21,7 +23,6 @@ int main()
 {
 	timeBeginPeriod(1);
 	srand((unsigned)time(nullptr));
-	g_ChatServer.Start();
 
 	g_iFirst = timeGetTime();
 	g_iOldFrameTick = g_iFirst;
