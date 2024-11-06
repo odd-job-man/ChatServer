@@ -2,6 +2,9 @@
 #include "Packet.h"
 #include "Player.h"
 #include "SCCContents.h"
+#include "ChatServer.h"
+
+extern ChatServer g_ChatServer;
 
 void JOB_ON_ACCEPT(WORD playerIdx, ULONGLONG sessionId);
 void JOB_ON_RELEASE(WORD playerIdx);
@@ -30,6 +33,14 @@ __forceinline void CS_CHAT_REQ_LOGIN_RECV(SmartPacket& sp)
 	WCHAR* pID = (WCHAR*)sp->GetPointer(sizeof(WCHAR) * Player::ID_LEN);
 	WCHAR* pNickName = (WCHAR*)sp->GetPointer(sizeof(WCHAR) * Player::NICK_NAME_LEN);
 	char* pSessionKey = (char*)sp->GetPointer(sizeof(char) * Player::SESSION_KEY_LEN);
+
+	if (sp->IsBufferEmpty() == false)
+	{
+		Player* pPlayer = Player::pPlayerArr + sp->playerIdx_;
+		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		return;
+	}
+
 	CS_CHAT_REQ_LOGIN(sp->playerIdx_, AccountNo, pID, pNickName, pSessionKey);
 }
 
@@ -39,6 +50,13 @@ __forceinline void CS_CHAT_REQ_SECTOR_MOVE_RECV(SmartPacket& sp)
 	WORD sectorX;
 	WORD sectorY;
 	*sp >> accountNo >> sectorX >> sectorY;
+
+	if (sp->IsBufferEmpty() == false)
+	{
+		Player* pPlayer = Player::pPlayerArr + sp->playerIdx_;
+		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		return;
+	}
 	CS_CHAT_REQ_SECTOR_MOVE(accountNo, sectorX, sectorY, sp->playerIdx_);
 }
 
@@ -49,6 +67,13 @@ __forceinline void CS_CHAT_REQ_MESSAGE_RECV(SmartPacket& sp)
 	WORD messageLen;
 	*sp >> messageLen;
 	WCHAR* pMessage = (WCHAR*)sp->GetPointer(messageLen);
+
+	if (pMessage == nullptr || sp->IsBufferEmpty() == false)
+	{
+		Player* pPlayer = Player::pPlayerArr + sp->playerIdx_;
+		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		return;
+	}
 	CS_CHAT_REQ_MESSAGE(accountNo, messageLen, pMessage, sp->playerIdx_);
 }
 

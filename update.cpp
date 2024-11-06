@@ -36,8 +36,9 @@ unsigned long long Update()
 			PacketProc_JOB(sp);
 		}
 	}
-	unsigned long long currentTime = GetTickCount64();
-	// 3초에 한번씩 타임아웃 체크함(우선 하드코딩)
+
+	//unsigned long long currentTime = GetTickCount64();
+	//// 3초에 한번씩 타임아웃 체크함(우선 하드코딩)
 	//if (currentTime - timeOutCheck <= 30000)
 	//	return ret;
 
@@ -58,26 +59,36 @@ unsigned long long Update()
 
 bool PacketProc_PACKET(SmartPacket& sp)
 {
-	WORD type;
-	*sp >> type;
-	switch (type)
+	try
 	{
-	case en_PACKET_CS_CHAT_REQ_LOGIN:
-		CS_CHAT_REQ_LOGIN_RECV(sp);
-		break;
-	case en_PACKET_CS_CHAT_REQ_SECTOR_MOVE:
-		CS_CHAT_REQ_SECTOR_MOVE_RECV(sp);
-		break;
-	case en_PACKET_CS_CHAT_REQ_MESSAGE:
-		CS_CHAT_REQ_MESSAGE_RECV(sp);
-		break;
-	case en_PACKET_CS_CHAT_REQ_HEARTBEAT:
-		CS_CHAT_REQ_HEARTBEAT_RECV(sp);
-		break;
-	default:
-		g_ChatServer.OnError(Player::pPlayerArr[sp->playerIdx_].sessionId_, (int)PACKET_PROC_RECVED_PACKET_INVALID_TYPE, sp.GetPacket());
-		g_ChatServer.Disconnect(Player::pPlayerArr[sp->playerIdx_].sessionId_);
-		break;
+		WORD type;
+		*sp >> type;
+		switch (type)
+		{
+		case en_PACKET_CS_CHAT_REQ_LOGIN:
+			CS_CHAT_REQ_LOGIN_RECV(sp);
+			break;
+		case en_PACKET_CS_CHAT_REQ_SECTOR_MOVE:
+			CS_CHAT_REQ_SECTOR_MOVE_RECV(sp);
+			break;
+		case en_PACKET_CS_CHAT_REQ_MESSAGE:
+			CS_CHAT_REQ_MESSAGE_RECV(sp);
+			break;
+		case en_PACKET_CS_CHAT_REQ_HEARTBEAT:
+			CS_CHAT_REQ_HEARTBEAT_RECV(sp);
+			break;
+		default:
+			g_ChatServer.Disconnect(Player::pPlayerArr[sp->playerIdx_].sessionId_);
+			break;
+		}
+	}
+	catch (int errCode)
+	{
+		if (errCode == ERR_PACKET_EXTRACT_FAIL)
+		{
+			Player* pPlayer = Player::pPlayerArr + sp->playerIdx_;
+			g_ChatServer.Disconnect(pPlayer->sessionId_);
+		}
 	}
 	return true;
 }

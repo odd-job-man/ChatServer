@@ -23,5 +23,5 @@ void RemoveClientAtSector(WORD sectorX, WORD sectorY, Player* pPlayer);
 
 __forceinline bool IsNonValidSector(WORD sectorX, WORD sectorY)
 {
-	return !((0 <= sectorX) && (sectorX <= NUM_OF_SECTOR_VERTICAL)) && ((0 <= sectorY) && (sectorY <= NUM_OF_SECTOR_HORIZONTAL));
+	return !(((0 <= sectorX) && (sectorX <= NUM_OF_SECTOR_VERTICAL)) && ((0 <= sectorY) && (sectorY <= NUM_OF_SECTOR_HORIZONTAL)));
 }

@@ -16,7 +16,7 @@ struct Player
 	bool bRegisterAtSector_;
 	WORD sectorX_;
 	WORD sectorY_;
-	LINKED_NODE sectorLink;
+	//LINKED_NODE sectorLink;
 	ULONGLONG sessionId_;
 	INT64 accountNo_;
 	ULONGLONG LastRecvedTime_;
@@ -24,7 +24,9 @@ struct Player
 	WCHAR nickName_[NICK_NAME_LEN];
 	// 좀 애매함
 	Player()
-		:sectorLink{ offsetof(Player,sectorLink) }, bUsing_{ false }, bLogin_{ false }, bRegisterAtSector_{ false }
+		:
+		//sectorLink{ offsetof(Player,sectorLink) }, 
+		bUsing_{ false }, bLogin_{ false }, bRegisterAtSector_{ false }
 	{}
 
 	static WORD MAKE_PLAYER_INDEX(ULONGLONG sessionId)

@@ -11,11 +11,17 @@
 
 #include "Parser.h"
 
+#include "MemLog.h"
+
 extern CMessageQ g_MQ;
 
 ChatServer g_ChatServer;
 
 ChatServer::ChatServer()
+{
+}
+
+void ChatServer::Start()
 {
 	char* pStart;
 	PARSER psr = CreateParser(L"ServerConfig.txt");
@@ -25,6 +31,11 @@ ChatServer::ChatServer()
 	ReleaseParser(psr);
 
 	Player::pPlayerArr = new Player[maxSession_];
+
+	for (DWORD i = 0; i < IOCP_WORKER_THREAD_NUM_; ++i)
+		ResumeThread(hIOCPWorkerThreadArr_[i]);
+
+	ResumeThread(hAcceptThread_);
 }
 
 BOOL ChatServer::OnConnectionRequest()
@@ -41,6 +52,7 @@ void* ChatServer::OnAccept(ULONGLONG id)
 	pPacket->playerIdx_ = Player::MAKE_PLAYER_INDEX(id);
 	pPacket->recvType_ = JOB;
 	*pPacket << (WORD)en_JOB_ON_ACCEPT << id;
+	MEMORY_LOG(ON_ACCEPT, id);
 	g_MQ.Enqueue(pPacket);
 	return nullptr;
 }
@@ -51,6 +63,7 @@ void ChatServer::OnRelease(ULONGLONG id)
 	pPacket->playerIdx_ = Session::GET_SESSION_INDEX(id);
 	pPacket->recvType_ = JOB;
 	*pPacket << (WORD)en_JOB_ON_RELEASE;
+	MEMORY_LOG(ON_RELEASE, id);
 	g_MQ.Enqueue(pPacket);
 }
 
@@ -77,6 +90,10 @@ void ChatServer::OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket)
 		__debugbreak();
 		break;
 	}
+}
+
+void ChatServer::OnPost(int order)
+{
 }
 
 void ChatServer::Monitoring(int updateCnt, unsigned long long BuffersProcessAtThisFrame)

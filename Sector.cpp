@@ -7,10 +7,10 @@
 
 #include "ChatServer.h"
 #include "Logger.h"
+#include <list>
 
 extern ChatServer g_ChatServer;
 
-#define MYLIST_SECTOR
 struct SectorArray
 {
 #ifdef MYLIST_SECTOR

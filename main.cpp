@@ -12,7 +12,7 @@ int g_iTime;
 int g_iFPS;
 int g_iFirst;
 
-constexpr int TICK_PER_FRAME = 40;
+constexpr int TICK_PER_FRAME = 10;
 constexpr int FRAME_PER_SECONDS = (1000) / TICK_PER_FRAME;
 
 extern ChatServer g_ChatServer;
@@ -31,6 +31,7 @@ int main()
 	g_iFpsCheck = g_iOldFrameTick;
 
 	unsigned long long sum = 0;
+	g_ChatServer.Start();
 	while (true)
 	{
 		sum += Update();

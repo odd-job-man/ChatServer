@@ -28,7 +28,8 @@ void JOB_ON_RELEASE(WORD playerIdx)
 	Player* pPlayer = Player::pPlayerArr + playerIdx;
 	if (pPlayer->bUsing_ == false)
 	{
-		MEMORY_LOG_WRITE_TO_FILE(MEMORY_LOG(J_ON_RELEASE,pPlayer->sessionId_));
+		//int idx = MEMORY_LOG(J_ON_RELEASE, pPlayer->sessionId_);
+		//MEMORY_LOG_WRITE_TO_FILE(idx);
 		__debugbreak();
 	}
 
@@ -67,13 +68,20 @@ void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const 
 void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD playerIdx)
 {
 	Player* pPlayer = Player::pPlayerArr + playerIdx;
-	pPlayer->LastRecvedTime_ = GetTickCount64();
+
+	if (pPlayer->bLogin_ == false)
+	{
+		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		return;
+	}
 
 	if (pPlayer->accountNo_ != accountNo)
 	{
 		g_ChatServer.Disconnect(pPlayer->sessionId_);
 		return;
 	}
+
+	pPlayer->LastRecvedTime_ = GetTickCount64();
 	
 	// 클라가 유효하지 않은 좌표로 요청햇다면 끊어버린다
 	if (IsNonValidSector(sectorX, sectorY))
@@ -99,7 +107,12 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD playerIdx)
 {
 	Player* pPlayer = Player::pPlayerArr + playerIdx;
-	pPlayer->LastRecvedTime_ = GetTickCount64();
+
+	if (pPlayer->bLogin_ == false)
+	{
+		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		return;
+	}
 
 	// 디버깅용
 	if (pPlayer->accountNo_ != accountNo)
@@ -107,6 +120,8 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 		g_ChatServer.Disconnect(pPlayer->sessionId_);
 		return;
 	}
+
+	pPlayer->LastRecvedTime_ = GetTickCount64();
 
 	SmartPacket sp = PACKET_ALLOC(Net);
 	MAKE_CS_CHAT_RES_MESSAGE(accountNo, pPlayer->ID_, pPlayer->nickName_, messageLen, pMessage, sp);
