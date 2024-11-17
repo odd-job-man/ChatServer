@@ -12,6 +12,8 @@ void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const 
 void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD playerIdx);
 void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD playerIdx);
 void CS_CHAT_REQ_HEARTBEAT(WORD playerIdx);
+void CS_CHAT_MONITORING_CLIENT_LOGIN(char MonitoringAccountNo, WORD playerIdx);
+void CS_CHAT_SEND_SECTOR_INFO_TO_MONITOR_CLIENT();
 
 __forceinline void JOB_ON_ACCEPT_RECV(SmartPacket& sp)
 {

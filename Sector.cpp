@@ -120,7 +120,6 @@ void SendPacket_AROUND(SECTOR_AROUND* pSectorAround, SmartPacket& sp)
 		{
 			g_ChatServer.SendPacket(((Player*)pPlayer)->sessionId_, sp);
 			pPlayer = pList->GetNext(pPlayer);
-			++g_ChatServer.RES_MESSAGE_TPS;
 		}
 	}
 #else
@@ -129,8 +128,20 @@ void SendPacket_AROUND(SECTOR_AROUND* pSectorAround, SmartPacket& sp)
 		for (void* player : sectors.listArr[pSectorAround->Around[i].sectorY][pSectorAround->Around[i].sectorX])
 		{
 			g_ChatServer.SendPacket(((Player*)player)->sessionId_, sp);
-			++g_ChatServer.RES_MESSAGE_TPS;
 		}
 	}
 #endif
 }
+
+void GetSectorMonitoringInfo(Packet* pOutPacket)
+{
+	int pos = 0;
+	for (int y = 0; y < NUM_OF_SECTOR_VERTICAL; ++y)
+	{
+		for (int x = 0; x < NUM_OF_SECTOR_HORIZONTAL; ++x)
+		{
+			*pOutPacket << (BYTE)sectors.listArr[y][x].size();
+		}
+	}
+}
+

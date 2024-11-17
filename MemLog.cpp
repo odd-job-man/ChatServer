@@ -2,7 +2,6 @@
 #include "Player.h"
 #include <cstdio>
 #include "MemLog.h"
-#define MEMLOG
 #ifdef MEMLOG
 unsigned long long g_Counter;
 MemLog g_MemLog[ARRAY_SIZE];

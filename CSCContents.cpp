@@ -6,6 +6,9 @@
 
 extern ChatServer g_ChatServer;
 
+bool g_bMonitoringClientLogin = false;
+ULONGLONG g_monitoringClientSessionID = ULLONG_MAX;
+
 void JOB_ON_ACCEPT(WORD playerIdx, ULONGLONG sessionId)
 {
 	// 이미 true라는 이야기는 이중 ON_ACCEPT임
@@ -34,6 +37,18 @@ void JOB_ON_RELEASE(WORD playerIdx)
 	}
 
 	pPlayer->bUsing_ = false;
+
+	if (g_bMonitoringClientLogin == true)
+	{
+		if(g_monitoringClientSessionID == pPlayer->sessionId_)
+			g_bMonitoringClientLogin = false;
+	}
+	else
+	{
+		if (g_monitoringClientSessionID == pPlayer->sessionId_)
+			__debugbreak();
+	}
+
 	// 로그인햇다면 이미 이동 메시지를 보내고 등록된 좌표에 해당하는 섹터에 등록햇을것이므로 삭제한다.
 	if (pPlayer->bLogin_ == true)
 	{
@@ -127,11 +142,100 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 	MAKE_CS_CHAT_RES_MESSAGE(accountNo, pPlayer->ID_, pPlayer->nickName_, messageLen, pMessage, sp);
 	SECTOR_AROUND sectorAround;
 	GetSectorAround(pPlayer->sectorX_, pPlayer->sectorY_, &sectorAround);
-	++g_ChatServer.REQ_MESSAGE_TPS;
 	SendPacket_AROUND(&sectorAround, sp);
 }
 
 void CS_CHAT_REQ_HEARTBEAT(WORD playerIdx)
 {
 	Player::pPlayerArr[playerIdx].LastRecvedTime_ = GetTickCount64();
+}
+
+constexpr char MONITOR_CLINET_ACCOUNT_NO = 1;
+
+void CS_CHAT_MONITORING_CLIENT_LOGIN(char MonitoringAccountNo,WORD playerIdx)
+{
+	Player* pPlayer = Player::pPlayerArr + playerIdx;
+
+	if (MonitoringAccountNo == MONITOR_CLINET_ACCOUNT_NO)
+	{
+		if (g_bMonitoringClientLogin == true)
+			g_ChatServer.Disconnect(g_monitoringClientSessionID);
+		else
+			g_bMonitoringClientLogin = true;
+
+		g_monitoringClientSessionID = pPlayer->sessionId_;
+	}
+	else
+	{
+		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		return;
+	}
+
+	pPlayer->accountNo_ = MonitoringAccountNo;
+	pPlayer->bLogin_ = true;
+	++g_ChatServer.lPlayerNum;
+}
+
+class MonitorPacket
+{
+public:
+	Packet packet_;
+
+	MonitorPacket()
+	{
+		packet_.IncreaseRefCnt();
+	}
+
+
+	~MonitorPacket()
+	{
+		packet_.DecrementRefCnt();
+		delete[] packet_.pBuffer_;
+	}
+
+	__forceinline Packet* GetPacket()
+	{
+		packet_.Clear<Net>();
+		return &packet_;
+	}
+
+	__forceinline bool canSend()
+	{
+		if (packet_.refCnt_ > 1)
+			return false;
+
+		if (packet_.refCnt_ <= 0)
+			__debugbreak();
+
+		return true;
+	}
+
+	__forceinline void SendPacket()
+	{
+		g_ChatServer.SendPacket(g_monitoringClientSessionID, &packet_);
+	}
+
+}g_MonitorPacket;
+
+Packet* g_monitoringPacket = nullptr;
+
+void CS_CHAT_SEND_SECTOR_INFO_TO_MONITOR_CLIENT()
+{
+	static ULONGLONG FirstTimeCheckForMonitor = GetTickCount64();
+	static ULONGLONG timeCheckForMonitor = FirstTimeCheckForMonitor;
+
+	ULONGLONG currentTime = GetTickCount64();
+	if (currentTime < timeCheckForMonitor + 1000)
+		return;
+
+	if (g_bMonitoringClientLogin == false)
+		return;
+
+	if (g_MonitorPacket.canSend() == false)
+		return;
+
+	GetSectorMonitoringInfo(g_MonitorPacket.GetPacket());
+	g_MonitorPacket.SendPacket();
+
+	timeCheckForMonitor = currentTime - ((currentTime - FirstTimeCheckForMonitor) % 1000);
 }

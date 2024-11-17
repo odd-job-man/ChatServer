@@ -14,13 +14,12 @@ extern ChatServer g_ChatServer;
 bool PacketProc_PACKET(SmartPacket& sp);
 bool PacketProc_JOB(SmartPacket& sp);
 
-unsigned long long Update()
+void Update()
 {
 	static unsigned long long timeOutCheck = GetTickCount64();
 	static unsigned long long firstTimeOutCheck = timeOutCheck;
 
 	g_MQ.Swap();
-	unsigned long long ret = g_MQ.BuffersToProcessThisFrame_;
 	while (true)
 	{
 		SmartPacket sp = g_MQ.Dequeue();
@@ -35,26 +34,26 @@ unsigned long long Update()
 		{
 			PacketProc_JOB(sp);
 		}
+		++g_ChatServer.UPDATE_CNT_TPS;
 	}
 
-	//unsigned long long currentTime = GetTickCount64();
-	//// 3초에 한번씩 타임아웃 체크함(우선 하드코딩)
-	//if (currentTime - timeOutCheck <= 30000)
-	//	return ret;
+	unsigned long long currentTime = GetTickCount64();
+	// 3초에 한번씩 타임아웃 체크함(우선 하드코딩)
+	if (currentTime < timeOutCheck + 3000)
+		return;
 
-	//for (int i = 0; i < g_ChatServer.maxSession_; ++i)
-	//{
-	//	Player* pPlayer = Player::pPlayerArr + i;
-	//	if (pPlayer->bUsing_ == false)
-	//		continue;
+	timeOutCheck = currentTime - ((currentTime - firstTimeOutCheck) % 3000);
+	for (int i = 0; i < g_ChatServer.maxSession_; ++i)
+	{
+		Player* pPlayer = Player::pPlayerArr + i;
+		if (pPlayer->bUsing_ == false)
+			continue;
 
-	//	//40초 지나면 타임 아웃 처리
-	//	if (currentTime - pPlayer->LastRecvedTime_ > g_ChatServer.TIME_OUT_MILLISECONDS_)
-	//		g_ChatServer.Disconnect(pPlayer->sessionId_);
-	//}
+		//40초 지나면 타임 아웃 처리
+		if (currentTime > pPlayer->LastRecvedTime_ + g_ChatServer.TIME_OUT_MILLISECONDS_)
+			g_ChatServer.Disconnect(pPlayer->sessionId_);
+	}
 
-	//timeOutCheck += timeOutCheck - ((timeOutCheck - firstTimeOutCheck) % 30000);
-	return ret;
 }
 
 bool PacketProc_PACKET(SmartPacket& sp)
@@ -77,6 +76,13 @@ bool PacketProc_PACKET(SmartPacket& sp)
 		case en_PACKET_CS_CHAT_REQ_HEARTBEAT:
 			CS_CHAT_REQ_HEARTBEAT_RECV(sp);
 			break;
+		case en_PACKET_MONITOR_CLIENT_LOGIN:
+		{
+			char monitorAccountNo;
+			*sp >> monitorAccountNo;
+			CS_CHAT_MONITORING_CLIENT_LOGIN(monitorAccountNo, sp->playerIdx_);
+		}
+		break;
 		default:
 			g_ChatServer.Disconnect(Player::pPlayerArr[sp->playerIdx_].sessionId_);
 			break;
@@ -88,6 +94,12 @@ bool PacketProc_PACKET(SmartPacket& sp)
 		{
 			Player* pPlayer = Player::pPlayerArr + sp->playerIdx_;
 			g_ChatServer.Disconnect(pPlayer->sessionId_);
+		}
+		else if (errCode == ERR_PACKET_RESIZE_FAIL)
+		{
+			// 지금은 이게 실패할리가 없음 사실 모니터링클라 접속안하면 리사이즈조차 아예 안일어날수도잇음
+			LOG(L"RESIZE", ERR, TEXTFILE, L"Resize Fail ShutDown Server");
+			__debugbreak();
 		}
 	}
 	return true;

@@ -19,6 +19,7 @@ void GetSectorAround(SHORT sectorX, SHORT sectorY, SECTOR_AROUND* pOutSectorArou
 void SendPacket_AROUND(SECTOR_AROUND* pSectorAround, SmartPacket& sp);
 void RegisterClientAtSector(WORD sectorX, WORD sectorY, Player* pPlayer);
 void RemoveClientAtSector(WORD sectorX, WORD sectorY, Player* pPlayer);
+void GetSectorMonitoringInfo(Packet* pOutPacket);
 //void DebugForSectorProb(Player* pPlayer);
 
 __forceinline bool IsNonValidSector(WORD sectorX, WORD sectorY)

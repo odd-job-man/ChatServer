@@ -12,12 +12,10 @@ int g_iTime;
 int g_iFPS;
 int g_iFirst;
 
-constexpr int TICK_PER_FRAME = 10;
-constexpr int FRAME_PER_SECONDS = (1000) / TICK_PER_FRAME;
-
 extern ChatServer g_ChatServer;
 
-unsigned long long Update();
+void Update();
+void CS_CHAT_SEND_SECTOR_INFO_TO_MONITOR_CLIENT();
 
 int main()
 {
@@ -34,36 +32,28 @@ int main()
 	g_ChatServer.Start();
 	while (true)
 	{
-		sum += Update();
+		Update();
 		g_iTime = timeGetTime();
 		++g_iFPS;
+		CS_CHAT_SEND_SECTOR_INFO_TO_MONITOR_CLIENT();
 		// 프레임 밀렷을때 
 		if (g_iTime - g_iFpsCheck >= 1000)
 		{
 			printf("FPS : %d\n", g_iFPS);
-			g_ChatServer.Monitoring(g_iFPS, sum);
-			printf("Press F1 To Disconnect All And Terminate Server!\n");
+			g_ChatServer.Monitoring();
 			g_iFPS = 0;
 			g_iFpsCheck += 1000;
 			sum = 0;
 		}
 
-		if (g_iTime - g_iOldFrameTick >= TICK_PER_FRAME)
+		if (g_iTime - g_iOldFrameTick >= g_ChatServer.TICK_PER_FRAME_)
 		{
-			g_iOldFrameTick = g_iTime - ((g_iTime - g_iFirst) % TICK_PER_FRAME);
+			g_iOldFrameTick = g_iTime - ((g_iTime - g_iFirst) % g_ChatServer.TICK_PER_FRAME_);
 			continue;
 		}
 
-		if (GetAsyncKeyState(VK_F1) & 0x01)
-		{
-			g_ChatServer.DisconnectAll();
-			printf("Disconnect All");
-			//g_ChatServer.Stop();
-			break;
-		}
-
-		Sleep(TICK_PER_FRAME - (g_iTime - g_iOldFrameTick));
-		g_iOldFrameTick += TICK_PER_FRAME;
+		Sleep(g_ChatServer.TICK_PER_FRAME_ - (g_iTime - g_iOldFrameTick));
+		g_iOldFrameTick += g_ChatServer.TICK_PER_FRAME_;
 	}
 
 	while (true)

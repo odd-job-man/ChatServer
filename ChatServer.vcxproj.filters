@@ -92,6 +92,9 @@
     <ClInclude Include="ChatServer.h">
       <Filter>헤더 파일\ChatServerHeader</Filter>
     </ClInclude>
+    <ClInclude Include="..\NetServer\NetServer\HMonitor.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CLinkedList.cpp">
@@ -129,6 +132,9 @@
     </ClCompile>
     <ClCompile Include="ChatServer.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NetServer\NetServer\HMonitor.cpp">
+      <Filter>소스 파일\NetLibCpp</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
