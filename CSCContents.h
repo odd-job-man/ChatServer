@@ -52,7 +52,6 @@ __forceinline void CS_CHAT_REQ_SECTOR_MOVE_RECV(SmartPacket& sp)
 	WORD sectorX;
 	WORD sectorY;
 	*sp >> accountNo >> sectorX >> sectorY;
-
 	if (sp->IsBufferEmpty() == false)
 	{
 		Player* pPlayer = Player::pPlayerArr + sp->playerIdx_;

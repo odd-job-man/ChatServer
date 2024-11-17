@@ -47,6 +47,7 @@ void ChatServer::Start()
 		ResumeThread(hIOCPWorkerThreadArr_[i]);
 
 	ResumeThread(hAcceptThread_);
+	//ResumeThread(hTimeOutThread_);
 }
 
 BOOL ChatServer::OnConnectionRequest()
@@ -103,7 +104,7 @@ void ChatServer::OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket)
 	}
 }
 
-void ChatServer::OnPost(int order)
+void ChatServer::OnPost(void* order)
 {
 }
 

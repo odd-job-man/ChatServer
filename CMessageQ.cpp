@@ -58,6 +58,8 @@ Packet* CMessageQ::Dequeue()
 
 	Node* pFree = pHeadForSingle_;
 	pHeadForSingle_ = pFree->pNext_;
+	if (pFree->pNext_ != pHeadForSingle_)
+		__debugbreak();
 	packetPool_.Free(pFree);
 	--BuffersToProcessThisFrame_;
 	return pHeadForSingle_->data_;

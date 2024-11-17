@@ -12,7 +12,7 @@ public:
 	virtual void OnRelease(ULONGLONG id);
 	virtual void OnRecv(ULONGLONG id, Packet* pPacket);
 	virtual void OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket);
-	virtual void OnPost(int order);
+	virtual void OnPost(void* order);
 	void Monitoring();
 	void DisconnectAll();
 	LONG TICK_PER_FRAME_;

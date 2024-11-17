@@ -148,6 +148,7 @@
     <ClInclude Include="..\NetServer\NetServer\HMonitor.h" />
     <ClInclude Include="..\NetServer\NetServer\IHandler.h" />
     <ClInclude Include="..\NetServer\NetServer\Logger.h" />
+    <ClInclude Include="..\NetServer\NetServer\MYOVERLAPPED.h" />
     <ClInclude Include="..\NetServer\NetServer\NetServer.h" />
     <ClInclude Include="..\NetServer\NetServer\Packet.h" />
     <ClInclude Include="..\NetServer\NetServer\Parser.h" />

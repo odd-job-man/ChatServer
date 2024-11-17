@@ -76,7 +76,8 @@ void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const 
 
 	SmartPacket sp = PACKET_ALLOC(Net);
 	MAKE_CS_CHAT_RES_LOGIN(en_PACKET_CS_CHAT_RES_LOGIN, 1, AccountNo, sp);
-	g_ChatServer.SendPacket(pPlayer->sessionId_, sp);
+	//g_ChatServer.SendPacket(pPlayer->sessionId_, sp);
+	g_ChatServer.SendPacket_ENQUEUE_ONLY(pPlayer->sessionId_, sp.GetPacket());
 	++g_ChatServer.lPlayerNum;
 }
 
@@ -110,13 +111,15 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 	else
 		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
 
+
 	pPlayer->sectorX_ = sectorX;
 	pPlayer->sectorY_ = sectorY;
 	RegisterClientAtSector(sectorX, sectorY, pPlayer);
 
 	SmartPacket sp = PACKET_ALLOC(Net);
 	MAKE_CS_CHAT_RES_SECTOR_MOVE(accountNo, sectorX, sectorY, sp);
-	g_ChatServer.SendPacket(pPlayer->sessionId_, sp);
+	//g_ChatServer.SendPacket(pPlayer->sessionId_, sp);
+	g_ChatServer.SendPacket_ENQUEUE_ONLY(pPlayer->sessionId_, sp.GetPacket());
 }
 
 void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD playerIdx)
@@ -212,7 +215,8 @@ public:
 
 	__forceinline void SendPacket()
 	{
-		g_ChatServer.SendPacket(g_monitoringClientSessionID, &packet_);
+		g_ChatServer.SendPacket_ENQUEUE_ONLY(g_monitoringClientSessionID, &packet_);
+		//g_ChatServer.SendPacket(g_monitoringClientSessionID, &packet_);
 	}
 
 }g_MonitorPacket;
