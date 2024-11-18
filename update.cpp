@@ -11,9 +11,9 @@
 CMessageQ g_MQ;
 extern ChatServer g_ChatServer;
 
+
 bool PacketProc_PACKET(SmartPacket& sp);
 bool PacketProc_JOB(SmartPacket& sp);
-
 void Update()
 {
 	g_MQ.Swap();

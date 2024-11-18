@@ -104,8 +104,28 @@ void ChatServer::OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket)
 	}
 }
 
+bool PacketProc_PACKET(SmartPacket& sp);
+bool PacketProc_JOB(SmartPacket& sp);
 void ChatServer::OnPost(void* order)
 {
+	//g_MQ.Swap();
+	//while (true)
+	//{
+	//	SmartPacket sp = g_MQ.Dequeue();
+	//	if (sp.GetPacket() == nullptr)
+	//		break;
+
+	//	if (sp->recvType_ == RECVED_PACKET)
+	//	{
+	//		PacketProc_PACKET(sp);
+	//	}
+	//	else
+	//	{
+	//		PacketProc_JOB(sp);
+	//	}
+	//	++g_ChatServer.UPDATE_CNT_TPS;
+	//}
+	//SetEvent(SendPostEndEvent_);
 }
 
 void ChatServer::Monitoring()
