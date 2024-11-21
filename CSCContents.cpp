@@ -9,81 +9,56 @@ extern ChatServer g_ChatServer;
 bool g_bMonitoringClientLogin = false;
 ULONGLONG g_monitoringClientSessionID = ULLONG_MAX;
 
-void JOB_ON_ACCEPT(WORD playerIdx, ULONGLONG sessionId)
-{
-	// 이미 true라는 이야기는 이중 ON_ACCEPT임
-	Player* pPlayer = Player::pPlayerArr + playerIdx;
-	if (pPlayer->bUsing_ == true)
-	{
-		MEMORY_LOG_WRITE_TO_FILE(MEMORY_LOG(J_ON_ACCEPT,pPlayer->sessionId_));
-		__debugbreak();
-	}
-	pPlayer->bUsing_ = true;
-	pPlayer->bLogin_ = false;
-	pPlayer->bRegisterAtSector_ = false;
-	pPlayer->sessionId_ = sessionId;
-	pPlayer->LastRecvedTime_ = GetTickCount64();
-}
-
-void JOB_ON_RELEASE(WORD playerIdx)
+void JOB_ON_RELEASE(ULONGLONG sessionID)
 {
 	// 이미 RELEASE 된 플레이어에 대해서 다시한번 RELEASE JOB이 도착한것임
-	Player* pPlayer = Player::pPlayerArr + playerIdx;
-	if (pPlayer->bUsing_ == false)
-	{
-		//int idx = MEMORY_LOG(J_ON_RELEASE, pPlayer->sessionId_);
-		//MEMORY_LOG_WRITE_TO_FILE(idx);
-		__debugbreak();
-	}
+	Player* pPlayer = Player::pPlayerArr + Player::MAKE_PLAYER_INDEX(sessionID);
 
-	pPlayer->bUsing_ = false;
+	// 세션만 생성되고 로그인 안하다가 자의로 끊거나 타임아웃된경우
+	if (pPlayer->bLogin_ == false)
+		return;
+	else
+		pPlayer->bLogin_ = false;
+
 
 	if (g_bMonitoringClientLogin == true)
 	{
 		if(g_monitoringClientSessionID == pPlayer->sessionId_)
 			g_bMonitoringClientLogin = false;
 	}
-	else
-	{
-		if (g_monitoringClientSessionID == pPlayer->sessionId_)
-			__debugbreak();
-	}
 
 	// 로그인햇다면 이미 이동 메시지를 보내고 등록된 좌표에 해당하는 섹터에 등록햇을것이므로 삭제한다.
-	if (pPlayer->bLogin_ == true)
-	{
-		if (pPlayer->bRegisterAtSector_ == true)
-			RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
-		--g_ChatServer.lPlayerNum;
-	}
+	if (pPlayer->bRegisterAtSector_ == true)
+		RemoveClientAtSector(pPlayer->sectorX_, pPlayer->sectorY_, pPlayer);
+	--g_ChatServer.lPlayerNum;
 }
 
-void CS_CHAT_REQ_LOGIN(WORD playerIdx, INT64 AccountNo, const WCHAR* pID, const WCHAR* pNickName, const char* pSessionKey)
+void CS_CHAT_REQ_LOGIN(ULONGLONG sessionID, INT64 AccountNo, const WCHAR* pID, const WCHAR* pNickName, const char* pSessionKey)
 {
 	// 플레이어수가 일정수 넘어가면 로그인 실패시킴
-	Player* pPlayer = Player::pPlayerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + Player::MAKE_PLAYER_INDEX(sessionID);
 	if (g_ChatServer.lPlayerNum >= Player::MAX_PLAYER_NUM)
 	{
 		g_ChatServer.Disconnect(pPlayer->sessionId_);
 		return;
 	}
-	pPlayer->LastRecvedTime_ = GetTickCount64();
-	pPlayer->accountNo_ = AccountNo;
 	pPlayer->bLogin_ = true;
+	pPlayer->bRegisterAtSector_ = false;
+	pPlayer->accountNo_ = AccountNo;
+	pPlayer->sessionId_ = sessionID;
 
 	wcscpy_s(pPlayer->ID_, Player::ID_LEN, pID);
 	wcscpy_s(pPlayer->nickName_, Player::NICK_NAME_LEN, pNickName);
 
 	SmartPacket sp = PACKET_ALLOC(Net);
 	MAKE_CS_CHAT_RES_LOGIN(en_PACKET_CS_CHAT_RES_LOGIN, 1, AccountNo, sp);
-	//g_ChatServer.SendPacket(pPlayer->sessionId_, sp);
 	g_ChatServer.SendPacket_ENQUEUE_ONLY(pPlayer->sessionId_, sp.GetPacket());
 	++g_ChatServer.lPlayerNum;
 }
 
-void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD playerIdx)
+void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, ULONGLONG sessionID)
 {
-	Player* pPlayer = Player::pPlayerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + Player::MAKE_PLAYER_INDEX(sessionID);
 
 	if (pPlayer->bLogin_ == false)
 	{
@@ -96,8 +71,6 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 		g_ChatServer.Disconnect(pPlayer->sessionId_);
 		return;
 	}
-
-	pPlayer->LastRecvedTime_ = GetTickCount64();
 	
 	// 클라가 유효하지 않은 좌표로 요청햇다면 끊어버린다
 	if (IsNonValidSector(sectorX, sectorY))
@@ -118,13 +91,12 @@ void CS_CHAT_REQ_SECTOR_MOVE(INT64 accountNo, WORD sectorX, WORD sectorY, WORD p
 
 	SmartPacket sp = PACKET_ALLOC(Net);
 	MAKE_CS_CHAT_RES_SECTOR_MOVE(accountNo, sectorX, sectorY, sp);
-	//g_ChatServer.SendPacket(pPlayer->sessionId_, sp);
 	g_ChatServer.SendPacket_ENQUEUE_ONLY(pPlayer->sessionId_, sp.GetPacket());
 }
 
-void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD playerIdx)
+void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, ULONGLONG sessionID)
 {
-	Player* pPlayer = Player::pPlayerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + Player::MAKE_PLAYER_INDEX(sessionID);
 
 	if (pPlayer->bLogin_ == false)
 	{
@@ -139,7 +111,6 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 		return;
 	}
 
-	pPlayer->LastRecvedTime_ = GetTickCount64();
 
 	SmartPacket sp = PACKET_ALLOC(Net);
 	MAKE_CS_CHAT_RES_MESSAGE(accountNo, pPlayer->ID_, pPlayer->nickName_, messageLen, pMessage, sp);
@@ -148,16 +119,16 @@ void CS_CHAT_REQ_MESSAGE(INT64 accountNo, WORD messageLen, WCHAR* pMessage, WORD
 	SendPacket_AROUND(&sectorAround, sp);
 }
 
-void CS_CHAT_REQ_HEARTBEAT(WORD playerIdx)
-{
-	Player::pPlayerArr[playerIdx].LastRecvedTime_ = GetTickCount64();
-}
 
 constexpr char MONITOR_CLINET_ACCOUNT_NO = 1;
 
-void CS_CHAT_MONITORING_CLIENT_LOGIN(char MonitoringAccountNo,WORD playerIdx)
+void CS_CHAT_MONITORING_CLIENT_LOGIN(char MonitoringAccountNo, ULONGLONG sessionID)
 {
-	Player* pPlayer = Player::pPlayerArr + playerIdx;
+	Player* pPlayer = Player::pPlayerArr + Player::MAKE_PLAYER_INDEX(sessionID);
+	pPlayer->sessionId_ = sessionID;
+	pPlayer->accountNo_ = MonitoringAccountNo;
+	pPlayer->bLogin_ = true;
+	++g_ChatServer.lPlayerNum;
 
 	if (MonitoringAccountNo == MONITOR_CLINET_ACCOUNT_NO)
 	{
@@ -166,17 +137,13 @@ void CS_CHAT_MONITORING_CLIENT_LOGIN(char MonitoringAccountNo,WORD playerIdx)
 		else
 			g_bMonitoringClientLogin = true;
 
-		g_monitoringClientSessionID = pPlayer->sessionId_;
+		g_monitoringClientSessionID = sessionID;
 	}
 	else
 	{
-		g_ChatServer.Disconnect(pPlayer->sessionId_);
+		g_ChatServer.Disconnect(sessionID);
 		return;
 	}
-
-	pPlayer->accountNo_ = MonitoringAccountNo;
-	pPlayer->bLogin_ = true;
-	++g_ChatServer.lPlayerNum;
 }
 
 class MonitorPacket
@@ -216,7 +183,6 @@ public:
 	__forceinline void SendPacket()
 	{
 		g_ChatServer.SendPacket_ENQUEUE_ONLY(g_monitoringClientSessionID, &packet_);
-		//g_ChatServer.SendPacket(g_monitoringClientSessionID, &packet_);
 	}
 
 }g_MonitorPacket;

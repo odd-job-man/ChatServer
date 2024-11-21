@@ -26,12 +26,10 @@ void Update()
 		if (sp->recvType_ == RECVED_PACKET)
 		{
 			PacketProc_PACKET(sp);
+			++g_ChatServer.UPDATE_CNT_TPS;
 		}
 		else
-		{
 			PacketProc_JOB(sp);
-		}
-		++g_ChatServer.UPDATE_CNT_TPS;
 	}
 	g_ChatServer.SendPostPerFrame();
 }
@@ -55,17 +53,16 @@ bool PacketProc_PACKET(SmartPacket& sp)
 			CS_CHAT_REQ_MESSAGE_RECV(sp);
 			break;
 		case en_PACKET_CS_CHAT_REQ_HEARTBEAT:
-			CS_CHAT_REQ_HEARTBEAT_RECV(sp);
 			break;
 		case en_PACKET_MONITOR_CLIENT_LOGIN:
 		{
 			char monitorAccountNo;
 			*sp >> monitorAccountNo;
-			CS_CHAT_MONITORING_CLIENT_LOGIN(monitorAccountNo, sp->playerIdx_);
+			CS_CHAT_MONITORING_CLIENT_LOGIN(monitorAccountNo, sp->sessionID_);
 		}
 		break;
 		default:
-			g_ChatServer.Disconnect(Player::pPlayerArr[sp->playerIdx_].sessionId_);
+			g_ChatServer.Disconnect(sp->sessionID_);
 			break;
 		}
 	}
@@ -73,13 +70,13 @@ bool PacketProc_PACKET(SmartPacket& sp)
 	{
 		if (errCode == ERR_PACKET_EXTRACT_FAIL)
 		{
-			Player* pPlayer = Player::pPlayerArr + sp->playerIdx_;
-			g_ChatServer.Disconnect(pPlayer->sessionId_);
+			g_ChatServer.Disconnect(sp->sessionID_);
 		}
 		else if (errCode == ERR_PACKET_RESIZE_FAIL)
 		{
 			// 지금은 이게 실패할리가 없음 사실 모니터링클라 접속안하면 리사이즈조차 아예 안일어날수도잇음
 			LOG(L"RESIZE", ERR, TEXTFILE, L"Resize Fail ShutDown Server");
+			__debugbreak();
 		}
 	}
 	return true;
@@ -91,9 +88,6 @@ bool PacketProc_JOB(SmartPacket& sp)
 	*sp >> type;
 	switch (type)
 	{
-	case en_JOB_ON_ACCEPT:
-		JOB_ON_ACCEPT_RECV(sp);
-		break;
 	case en_JOB_ON_RELEASE:
 		JOB_ON_RELEASE_RECV(sp);
 		break;

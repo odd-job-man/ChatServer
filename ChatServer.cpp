@@ -20,8 +20,7 @@ extern CMessageQ g_MQ;
 ChatServer g_ChatServer;
 
 ChatServer::ChatServer()
-{
-}
+{}
 
 void ChatServer::Start()
 {
@@ -60,19 +59,13 @@ BOOL ChatServer::OnConnectionRequest()
 
 void* ChatServer::OnAccept(ULONGLONG id)
 {
-	Packet* pPacket = PACKET_ALLOC(Net);
-	pPacket->playerIdx_ = Player::MAKE_PLAYER_INDEX(id);
-	pPacket->recvType_ = JOB;
-	*pPacket << (WORD)en_JOB_ON_ACCEPT << id;
-	MEMORY_LOG(ON_ACCEPT, id);
-	g_MQ.Enqueue(pPacket);
 	return nullptr;
 }
 
 void ChatServer::OnRelease(ULONGLONG id)
 {
 	Packet* pPacket = PACKET_ALLOC(Net);
-	pPacket->playerIdx_ = Session::GET_SESSION_INDEX(id);
+	pPacket->sessionID_ = id;
 	pPacket->recvType_ = JOB;
 	*pPacket << (WORD)en_JOB_ON_RELEASE;
 	MEMORY_LOG(ON_RELEASE, id);
@@ -81,7 +74,7 @@ void ChatServer::OnRelease(ULONGLONG id)
 
 void ChatServer::OnRecv(ULONGLONG id, Packet* pPacket)
 {
-	pPacket->playerIdx_ = Player::MAKE_PLAYER_INDEX(id);
+	pPacket->sessionID_= id;
 	pPacket->recvType_ = RECVED_PACKET;
 	g_MQ.Enqueue(pPacket);
 }
@@ -104,29 +97,8 @@ void ChatServer::OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket)
 	}
 }
 
-bool PacketProc_PACKET(SmartPacket& sp);
-bool PacketProc_JOB(SmartPacket& sp);
 void ChatServer::OnPost(void* order)
-{
-	//g_MQ.Swap();
-	//while (true)
-	//{
-	//	SmartPacket sp = g_MQ.Dequeue();
-	//	if (sp.GetPacket() == nullptr)
-	//		break;
-
-	//	if (sp->recvType_ == RECVED_PACKET)
-	//	{
-	//		PacketProc_PACKET(sp);
-	//	}
-	//	else
-	//	{
-	//		PacketProc_JOB(sp);
-	//	}
-	//	++g_ChatServer.UPDATE_CNT_TPS;
-	//}
-	//SetEvent(SendPostEndEvent_);
-}
+{}
 
 void ChatServer::Monitoring()
 {

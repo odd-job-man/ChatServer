@@ -1,6 +1,7 @@
 #pragma once
 #include<windows.h>
 #include "CLinkedList.h"
+#define MYLIST_SECTOR
 
 struct Player
 {
@@ -11,23 +12,31 @@ struct Player
 	static inline Player* pPlayerArr;
 	static constexpr int INITIAL_SECTOR_VALUE = 51;
 
-	bool bUsing_;
 	bool bLogin_;
 	bool bRegisterAtSector_;
 	WORD sectorX_;
 	WORD sectorY_;
-	//LINKED_NODE sectorLink;
+#ifdef MYLIST_SECTOR
+	LINKED_NODE sectorLink;
+#endif
 	ULONGLONG sessionId_;
 	INT64 accountNo_;
-	ULONGLONG LastRecvedTime_;
 	WCHAR ID_[ID_LEN];
 	WCHAR nickName_[NICK_NAME_LEN];
 	// 좀 애매함
 	Player()
 		:
-		//sectorLink{ offsetof(Player,sectorLink) }, 
-		bUsing_{ false }, bLogin_{ false }, bRegisterAtSector_{ false }
+#ifdef MYLIST_SECTOR
+		sectorLink{ offsetof(Player,sectorLink) }, 
+#endif
+		bLogin_{ false }, bRegisterAtSector_{ false }
 	{}
+
+	__forceinline void LoginInit()
+	{
+		bLogin_ = true;
+		bRegisterAtSector_ = false;
+	}
 
 	static WORD MAKE_PLAYER_INDEX(ULONGLONG sessionId)
 	{
