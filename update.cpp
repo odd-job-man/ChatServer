@@ -26,12 +26,12 @@ void Update()
 		if (sp->recvType_ == RECVED_PACKET)
 		{
 			PacketProc_PACKET(sp);
-			++g_ChatServer.UPDATE_CNT_TPS;
 		}
 		else
 			PacketProc_JOB(sp);
+		++g_ChatServer.UPDATE_CNT_TPS;
 	}
-	g_ChatServer.SendPostPerFrame();
+	g_ChatServer.SEND_POST_PER_FRAME();
 }
 
 

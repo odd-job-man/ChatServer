@@ -153,8 +153,6 @@ void ChatServer::Monitoring()
 		"Send Msg TPS: %d\n"
 		"Session Num : %d\n"
 		"Player Num : %d\n"
-		"RECV TOTAL : %llu\n"
-		"RECV_AVR : %.2f\n"
 		"----------------------\n"
 		"Process Private MBytes : %.2lf\n"
 		"Process NP Pool KBytes : %.2lf\n"
@@ -162,7 +160,8 @@ void ChatServer::Monitoring()
 		"Machine NP Pool MBytes : %.2lf\n"
 		"Processor CPU Time : %.2f\n"
 		"Process CPU Time : %.2f\n"
-		"Process CPU Time AVR : %.2f\n\n",
+		"Process CPU Time AVR : %.2f\n"
+		"TCP Retransmitted/sec : %.2f\n\n",
 		ullElapsedDay, ullElapsedHour, ullElapsedMin, ullElapsedSecond,
 		UPDATE_CNT_TPS,
 		UPDATE_CNT_TOTAL / (float)temp,
@@ -178,15 +177,14 @@ void ChatServer::Monitoring()
 		sendTPS,
 		lSessionNum_,
 		lPlayerNum,
-		RECV_TOTAL,
-		RECV_TOTAL / (float)temp,
 		monitor.GetPPB() / (1024 * 1024),
 		monitor.GetPNPB() / 1024,
 		monitor.GetAB(),
 		monitor.GetNPB() / (1024 * 1024),
 		monitor._fProcessorTotal,
 		monitor._fProcessTotal,
-		(float)(PROCESS_CPU_TICK_ELAPSED / (double)monitor._iNumberOfProcessors / (double)PROCESS_CPU_TICK_TIME_DIFF) * 100.0f
+		(float)(PROCESS_CPU_TICK_ELAPSED / (double)monitor._iNumberOfProcessors / (double)PROCESS_CPU_TICK_TIME_DIFF) * 100.0f,
+		monitor.GetRetranse()
 		);
 
 	UPDATE_CNT_TPS = 0;
