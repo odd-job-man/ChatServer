@@ -12,56 +12,17 @@
     <Filter Include="소스 파일\NetLibCpp">
       <UniqueIdentifier>{8da1ebf4-83c4-44d0-980f-2cd941b252ff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\NetLibHeader">
-      <UniqueIdentifier>{e8a0bf9b-1ba2-4c60-8c5c-a15e039ecd0a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\ChatServerHeader">
       <UniqueIdentifier>{aac85cda-488b-4a1a-b96b-f4bcbff792f2}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\ChatServerCpp">
       <UniqueIdentifier>{c4d0b288-ae99-4b12-b645-3625d741d8d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\NetLibHeader">
+      <UniqueIdentifier>{57131887-8e27-40cf-ba0a-cf7847f2cc34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\NetServer\NetServer\CAddressTranslator.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\CLockFreeObjectPool.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\CLockFreeQueue.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\CLockFreeStack.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\CTlsObjectPool.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\ErrType.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\IHandler.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\Logger.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\NetServer.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\Packet.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\Parser.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\RingBuffer.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\Session.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
     <ClInclude Include="CLinkedList.h">
       <Filter>헤더 파일\ChatServerHeader</Filter>
     </ClInclude>
@@ -92,10 +53,52 @@
     <ClInclude Include="ChatServer.h">
       <Filter>헤더 파일\ChatServerHeader</Filter>
     </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\HMonitor.h">
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\RingBuffer.h">
       <Filter>헤더 파일\NetLibHeader</Filter>
     </ClInclude>
-    <ClInclude Include="..\NetServer\NetServer\MYOVERLAPPED.h">
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Session.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CAddressTranslator.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeObjectPool.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeQueue.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeStack.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CTlsObjectPool.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\ErrType.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\HMonitor.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\IHandler.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Logger.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\MYOVERLAPPED.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\NetServer.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Packet.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Parser.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Timer.h">
       <Filter>헤더 파일\NetLibHeader</Filter>
     </ClInclude>
   </ItemGroup>
@@ -124,19 +127,22 @@
     <ClCompile Include="update.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\NetServer\NetServer\RingBuffer.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\NetServer\NetServer\Session.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\NetServer\NetServer\NetServer.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
     <ClCompile Include="ChatServer.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\NetServer\NetServer\HMonitor.cpp">
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\HMonitor.cpp">
+      <Filter>소스 파일\NetLibCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\RingBuffer.cpp">
+      <Filter>소스 파일\NetLibCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Session.cpp">
+      <Filter>소스 파일\NetLibCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\NetServer.cpp">
+      <Filter>소스 파일\NetLibCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Timer.cpp">
       <Filter>소스 파일\NetLibCpp</Filter>
     </ClCompile>
   </ItemGroup>

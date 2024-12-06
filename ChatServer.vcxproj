@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\dhtmd\Documents\GitHub\NetServer\NetServer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\dhtmd\OneDrive\문서\GitHub\NetServer\NetServer\NetServer</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,7 +129,7 @@
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:offsetof- %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>C:\Users\dhtmd\Documents\GitHub\NetServer\NetServer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\dhtmd\OneDrive\문서\GitHub\NetServer\NetServer\NetServer</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,21 +139,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\NetServer\NetServer\CAddressTranslator.h" />
-    <ClInclude Include="..\NetServer\NetServer\CLockFreeObjectPool.h" />
-    <ClInclude Include="..\NetServer\NetServer\CLockFreeQueue.h" />
-    <ClInclude Include="..\NetServer\NetServer\CLockFreeStack.h" />
-    <ClInclude Include="..\NetServer\NetServer\CTlsObjectPool.h" />
-    <ClInclude Include="..\NetServer\NetServer\ErrType.h" />
-    <ClInclude Include="..\NetServer\NetServer\HMonitor.h" />
-    <ClInclude Include="..\NetServer\NetServer\IHandler.h" />
-    <ClInclude Include="..\NetServer\NetServer\Logger.h" />
-    <ClInclude Include="..\NetServer\NetServer\MYOVERLAPPED.h" />
-    <ClInclude Include="..\NetServer\NetServer\NetServer.h" />
-    <ClInclude Include="..\NetServer\NetServer\Packet.h" />
-    <ClInclude Include="..\NetServer\NetServer\Parser.h" />
-    <ClInclude Include="..\NetServer\NetServer\RingBuffer.h" />
-    <ClInclude Include="..\NetServer\NetServer\Session.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CAddressTranslator.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeObjectPool.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeQueue.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeStack.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CTlsObjectPool.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\ErrType.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\HMonitor.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\IHandler.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Logger.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\MYOVERLAPPED.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\NetServer.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Packet.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Parser.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\RingBuffer.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Session.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Timer.h" />
     <ClInclude Include="ChatServer.h" />
     <ClInclude Include="CLinkedList.h" />
     <ClInclude Include="CMessageQ.h" />
@@ -166,10 +167,11 @@
     <ClInclude Include="Sector.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\NetServer\NetServer\HMonitor.cpp" />
-    <ClCompile Include="..\NetServer\NetServer\NetServer.cpp" />
-    <ClCompile Include="..\NetServer\NetServer\RingBuffer.cpp" />
-    <ClCompile Include="..\NetServer\NetServer\Session.cpp" />
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\HMonitor.cpp" />
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\NetServer.cpp" />
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\RingBuffer.cpp" />
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Session.cpp" />
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Timer.cpp" />
     <ClCompile Include="ChatServer.cpp" />
     <ClCompile Include="CLinkedList.cpp" />
     <ClCompile Include="CMessageQ.cpp" />
