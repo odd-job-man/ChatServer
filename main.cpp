@@ -23,12 +23,6 @@ int main()
 {
 	timeBeginPeriod(1);
 	srand((unsigned)time(nullptr));
-
-	//g_iFirst = timeGetTime();
-	//g_iOldFrameTick = g_iFirst;
-	//g_iTime = g_iOldFrameTick;
-	//g_iFPS = 0;
-	//g_iFpsCheck = g_iOldFrameTick;
 	g_ChatServer.Start();
 	Sleep(INFINITE);
 	//while (true)

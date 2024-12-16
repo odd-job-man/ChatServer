@@ -1,6 +1,7 @@
 #include <WinSock2.h>
 #include <stdio.h>
-#include "Windows.h"
+#include <Windows.h>
+#include "NetSession.h"
 #include "ChatServer.h"
 #include "Packet.h"
 #include "Player.h"
@@ -48,11 +49,11 @@ void ChatServer::Start()
 		ResumeThread(hIOCPWorkerThreadArr_[i]);
 
 	ResumeThread(hAcceptThread_);
-	UpdateBase* pChatUpdate = new ChattingUpdate{ (DWORD)TICK_PER_FRAME_,hcp_,5 };
+	ChattingUpdate* pChatUpdate = new ChattingUpdate{ (DWORD)TICK_PER_FRAME_,hcp_,5 };
 	MonitoringUpdate* pMonitor = new MonitoringUpdate{ hcp_,1000,5 };
 	Timer::Reigster_UPDATE(pChatUpdate);
 	Timer::Reigster_UPDATE(pMonitor);
-	pMonitor->RegisterMonitor(pChatUpdate);
+	pMonitor->RegisterMonitor(static_cast<const Monitorable*>(pChatUpdate));
 	Timer::Start();
 }
 
@@ -106,7 +107,7 @@ void ChatServer::OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket)
 
 void ChatServer::OnPost(void* order)
 {
-	((Excutable*)order)->Execute();
+	((Excutable*)order)->Excute();
 }
 
 void ChatServer::Monitoring()

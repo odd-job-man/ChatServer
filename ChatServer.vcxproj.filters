@@ -21,11 +21,35 @@
     <Filter Include="헤더 파일\NetLibHeader">
       <UniqueIdentifier>{57131887-8e27-40cf-ba0a-cf7847f2cc34}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ServerCommon">
+      <UniqueIdentifier>{3d0419ea-5929-4b2b-b4ec-a3bf8fd8cfb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\DataStructure">
+      <UniqueIdentifier>{97836426-2c3e-46ad-a531-6357e3ffd7de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\DB">
+      <UniqueIdentifier>{323e4da8-efce-4145-baeb-69fd6ec86fde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\Job">
+      <UniqueIdentifier>{31d290bf-d29d-40d4-9a2a-2db1ca7bb53c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\Logger">
+      <UniqueIdentifier>{27592404-4e1c-459e-9197-fb6b5b3a7d40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\Monitor">
+      <UniqueIdentifier>{4b1ff9b6-053a-42c4-b00c-16d13e3d0fbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\NetWork">
+      <UniqueIdentifier>{cd04a2ae-cb18-4fa7-b739-739e47b85b28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\Parser">
+      <UniqueIdentifier>{6b0a5258-879a-437f-b652-b1c214dfbb6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCommon\UpdateAndTimer">
+      <UniqueIdentifier>{680afefa-bac3-4582-a5b9-4d46f49fb4cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CLinkedList.h">
-      <Filter>헤더 파일\ChatServerHeader</Filter>
-    </ClInclude>
     <ClInclude Include="CMessageQ.h">
       <Filter>헤더 파일\ChatServerHeader</Filter>
     </ClInclude>
@@ -53,68 +77,80 @@
     <ClInclude Include="ChatServer.h">
       <Filter>헤더 파일\ChatServerHeader</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\RingBuffer.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Session.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CAddressTranslator.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeObjectPool.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeQueue.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeStack.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CTlsObjectPool.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\ErrType.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\HMonitor.h">
       <Filter>헤더 파일\NetLibHeader</Filter>
     </ClInclude>
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\IHandler.h">
       <Filter>헤더 파일\NetLibHeader</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Logger.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\MYOVERLAPPED.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\NetServer.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Packet.h">
-      <Filter>헤더 파일\NetLibHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Parser.h">
       <Filter>헤더 파일\NetLibHeader</Filter>
     </ClInclude>
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\UpdateBase.h">
       <Filter>헤더 파일\NetLibHeader</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Timer.h">
-      <Filter>헤더 파일\ChatServerHeader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\MyJob.h">
-      <Filter>헤더 파일\ChatServerHeader</Filter>
-    </ClInclude>
     <ClInclude Include="ChattingUpdate.h">
       <Filter>헤더 파일\ChatServerHeader</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Assert.h">
+      <Filter>ServerCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\MYOVERLAPPED.h">
+      <Filter>ServerCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CAddressTranslator.h">
+      <Filter>ServerCommon\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLinkedList.h">
+      <Filter>ServerCommon\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLockFreeObjectPool.h">
+      <Filter>ServerCommon\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLockFreeQueue.h">
+      <Filter>ServerCommon\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLockFreeStack.h">
+      <Filter>ServerCommon\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CTlsObjectPool.h">
+      <Filter>ServerCommon\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DB\QueryFactory.h">
+      <Filter>ServerCommon\DB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Job\MyJob.h">
+      <Filter>ServerCommon\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Logger\Logger.h">
+      <Filter>ServerCommon\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Monitor\HMonitor.h">
+      <Filter>ServerCommon\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Monitor\Monitorable.h">
+      <Filter>ServerCommon\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\NetWork\RingBuffer.h">
+      <Filter>ServerCommon\NetWork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\NetWork\Packet.h">
+      <Filter>ServerCommon\NetWork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Parser\Parser.h">
+      <Filter>ServerCommon\Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\Timer.h">
+      <Filter>ServerCommon\UpdateAndTimer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\UpdateBase.h">
+      <Filter>ServerCommon\UpdateAndTimer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\NetSession.h">
+      <Filter>헤더 파일\NetLibHeader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CLinkedList.cpp">
-      <Filter>소스 파일\ChatServerCpp</Filter>
-    </ClCompile>
     <ClCompile Include="CMessageQ.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
     </ClCompile>
@@ -133,32 +169,63 @@
     <ClCompile Include="Sector.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
     </ClCompile>
-    <ClCompile Include="update.cpp">
-      <Filter>소스 파일\ChatServerCpp</Filter>
-    </ClCompile>
     <ClCompile Include="ChatServer.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\HMonitor.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\RingBuffer.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Session.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\NetServer\NetServer\NetServer\NetServer.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\UpdateBase.cpp">
-      <Filter>소스 파일\NetLibCpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Timer.cpp">
       <Filter>소스 파일\NetLibCpp</Filter>
     </ClCompile>
     <ClCompile Include="ChattingUpdate.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\DataStructure\CLinkedList.cpp">
+      <Filter>ServerCommon\DataStructure</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\DB\QueryFactory.cpp">
+      <Filter>ServerCommon\DB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\Monitor\HMonitor.cpp">
+      <Filter>ServerCommon\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\NetWork\RingBuffer.cpp">
+      <Filter>ServerCommon\NetWork</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\UpdateBase.cpp">
+      <Filter>ServerCommon\UpdateAndTimer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\Timer.cpp">
+      <Filter>ServerCommon\UpdateAndTimer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\NetSession.cpp">
+      <Filter>소스 파일\ChatServerCpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\ServerCommon\ServerCommon\DB\libcrypto-3-x64.dll">
+      <Filter>ServerCommon\DB</Filter>
+    </None>
+    <None Include="..\..\ServerCommon\ServerCommon\DB\libmysql.dll">
+      <Filter>ServerCommon\DB</Filter>
+    </None>
+    <None Include="..\..\ServerCommon\ServerCommon\DB\libssl-3-x64.dll">
+      <Filter>ServerCommon\DB</Filter>
+    </None>
+    <None Include="..\..\ServerCommon\ServerCommon\Logger\LoggerMT.dll">
+      <Filter>ServerCommon\Logger</Filter>
+    </None>
+    <None Include="..\..\ServerCommon\ServerCommon\Parser\TextParser.dll">
+      <Filter>ServerCommon\Parser</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\ServerCommon\ServerCommon\DB\libmysql.lib">
+      <Filter>ServerCommon\DB</Filter>
+    </Library>
+    <Library Include="..\..\ServerCommon\ServerCommon\Logger\LoggerMT.lib">
+      <Filter>ServerCommon\Logger</Filter>
+    </Library>
+    <Library Include="..\..\ServerCommon\ServerCommon\Parser\TextParser.lib">
+      <Filter>ServerCommon\Parser</Filter>
+    </Library>
   </ItemGroup>
 </Project>

@@ -59,15 +59,19 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CommonProperty.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CommonProperty.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CommonProperty.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CommonProperty.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,7 +133,6 @@
       <Optimization>Disabled</Optimization>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:offsetof- %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>C:\Users\dhtmd\OneDrive\문서\GitHub\NetServer\NetServer\NetServer</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,27 +142,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CAddressTranslator.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeObjectPool.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeQueue.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CLockFreeStack.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\CTlsObjectPool.h" />
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\ErrType.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\HMonitor.h" />
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\IHandler.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Logger.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\MyJob.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\MYOVERLAPPED.h" />
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\NetServer.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Packet.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Parser.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\RingBuffer.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Session.h" />
-    <ClInclude Include="..\..\NetServer\NetServer\NetServer\Timer.h" />
+    <ClInclude Include="..\..\NetServer\NetServer\NetServer\NetSession.h" />
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\UpdateBase.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Assert.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CAddressTranslator.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLinkedList.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLockFreeObjectPool.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLockFreeQueue.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CLockFreeStack.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DataStructure\CTlsObjectPool.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DB\QueryFactory.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Job\MyJob.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Logger\Logger.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Monitor\HMonitor.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Monitor\Monitorable.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\MYOVERLAPPED.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\NetWork\Packet.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\NetWork\RingBuffer.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\Parser\Parser.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\Timer.h" />
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\UpdateBase.h" />
     <ClInclude Include="ChatServer.h" />
     <ClInclude Include="ChattingUpdate.h" />
-    <ClInclude Include="CLinkedList.h" />
     <ClInclude Include="CMessageQ.h" />
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="CSCContents.h" />
@@ -170,22 +177,34 @@
     <ClInclude Include="Sector.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\HMonitor.cpp" />
     <ClCompile Include="..\..\NetServer\NetServer\NetServer\NetServer.cpp" />
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\RingBuffer.cpp" />
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Session.cpp" />
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\Timer.cpp" />
-    <ClCompile Include="..\..\NetServer\NetServer\NetServer\UpdateBase.cpp" />
+    <ClCompile Include="..\..\NetServer\NetServer\NetServer\NetSession.cpp" />
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\DataStructure\CLinkedList.cpp" />
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\DB\QueryFactory.cpp" />
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\Monitor\HMonitor.cpp" />
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\NetWork\RingBuffer.cpp" />
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\Timer.cpp" />
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\UpdateAndTimer\UpdateBase.cpp" />
     <ClCompile Include="ChatServer.cpp" />
     <ClCompile Include="ChattingUpdate.cpp" />
-    <ClCompile Include="CLinkedList.cpp" />
     <ClCompile Include="CMessageQ.cpp" />
     <ClCompile Include="CSCContents.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemLog.cpp" />
     <ClCompile Include="SCCContents.cpp" />
     <ClCompile Include="Sector.cpp" />
-    <ClCompile Include="update.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\ServerCommon\ServerCommon\DB\libcrypto-3-x64.dll" />
+    <None Include="..\..\ServerCommon\ServerCommon\DB\libmysql.dll" />
+    <None Include="..\..\ServerCommon\ServerCommon\DB\libssl-3-x64.dll" />
+    <None Include="..\..\ServerCommon\ServerCommon\Logger\LoggerMT.dll" />
+    <None Include="..\..\ServerCommon\ServerCommon\Parser\TextParser.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\ServerCommon\ServerCommon\DB\libmysql.lib" />
+    <Library Include="..\..\ServerCommon\ServerCommon\Logger\LoggerMT.lib" />
+    <Library Include="..\..\ServerCommon\ServerCommon\Parser\TextParser.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
