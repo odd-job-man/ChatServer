@@ -1,6 +1,6 @@
 #include "WinSock2.h"
 #include "Packet.h"
-#include "Session.h"
+#include "NetSession.h"
 #include "Player.h"
 #include "SCCContents.h"
 
