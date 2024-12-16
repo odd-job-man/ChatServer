@@ -12,6 +12,8 @@
 #include "Parser.h"
 
 #include "MemLog.h"
+#include "Timer.h"
+#include "ChattingUpdate.h"
 
 #pragma comment(lib,"pdh.lib")
 
@@ -46,7 +48,12 @@ void ChatServer::Start()
 		ResumeThread(hIOCPWorkerThreadArr_[i]);
 
 	ResumeThread(hAcceptThread_);
-	//ResumeThread(hTimeOutThread_);
+	UpdateBase* pChatUpdate = new ChattingUpdate{ (DWORD)TICK_PER_FRAME_,hcp_,5 };
+	MonitoringUpdate* pMonitor = new MonitoringUpdate{ hcp_,1000,5 };
+	Timer::Reigster_UPDATE(pChatUpdate);
+	Timer::Reigster_UPDATE(pMonitor);
+	pMonitor->RegisterMonitor(pChatUpdate);
+	Timer::Start();
 }
 
 BOOL ChatServer::OnConnectionRequest()
@@ -98,7 +105,9 @@ void ChatServer::OnError(ULONGLONG id, int errorType, Packet* pRcvdPacket)
 }
 
 void ChatServer::OnPost(void* order)
-{}
+{
+	((Excutable*)order)->Execute();
+}
 
 void ChatServer::Monitoring()
 {
