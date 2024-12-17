@@ -1,5 +1,6 @@
 #pragma once
-#include <NetServer.h>
+#include "NetServer.h"
+#include "CMClient.h"
 #include "HMonitor.h"
 
 class ChatServer : public NetServer
@@ -16,12 +17,13 @@ public:
 	void Monitoring();
 	void DisconnectAll();
 	LONG TICK_PER_FRAME_;
-	ULONGLONG SESSION_TIMEOUT_;
-	ULONGLONG PLAYER_TIMEOUT_;
+	const ULONGLONG SESSION_TIMEOUT_;
+	const ULONGLONG PLAYER_TIMEOUT_;
 	LONG UPDATE_CNT_TPS = 0;
 	ULONGLONG UPDATE_CNT_TOTAL = 0;
 	ULONGLONG RECV_TOTAL = 0;
 	ULONGLONG PROCESS_CPU_TICK_ELAPSED = 0;
 	ULONGLONG PROCESS_CPU_TICK_TIME_DIFF = 0;
 	static inline HMonitor monitor;
+	CMClient* pLanClient_;
 };

@@ -48,6 +48,12 @@
     <Filter Include="ServerCommon\UpdateAndTimer">
       <UniqueIdentifier>{680afefa-bac3-4582-a5b9-4d46f49fb4cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LanClient">
+      <UniqueIdentifier>{5d9c1897-d3b2-4e26-8167-35013c8375c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MonitoringClient">
+      <UniqueIdentifier>{93fd96ee-7035-458f-8111-9c1049cfd78d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMessageQ.h">
@@ -149,6 +155,15 @@
     <ClInclude Include="..\..\NetServer\NetServer\NetServer\NetSession.h">
       <Filter>헤더 파일\NetLibHeader</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\LanClient\LanClient\LanClient.h">
+      <Filter>LanClient</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\LanClient\LanClient\LanClientSession.h">
+      <Filter>LanClient</Filter>
+    </ClInclude>
+    <ClInclude Include="CMClient.h">
+      <Filter>MonitoringClient</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CMessageQ.cpp">
@@ -198,6 +213,15 @@
     </ClCompile>
     <ClCompile Include="..\..\NetServer\NetServer\NetServer\NetSession.cpp">
       <Filter>소스 파일\ChatServerCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\LanClient\LanClient\LanClient.cpp">
+      <Filter>LanClient</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\LanClient\LanClient\LanClientSession.cpp">
+      <Filter>LanClient</Filter>
+    </ClCompile>
+    <ClCompile Include="CMClient.cpp">
+      <Filter>MonitoringClient</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

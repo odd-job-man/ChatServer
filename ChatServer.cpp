@@ -15,14 +15,23 @@
 #include "MemLog.h"
 #include "Timer.h"
 #include "ChattingUpdate.h"
+#include "CMClient.h"
+#include "CommonProtocol.h"
 
 #pragma comment(lib,"pdh.lib")
+
+template<typename T>
+__forceinline T& IGNORE_CONST(const T& value)
+{
+	return const_cast<T&>(value);
+}
 
 extern CMessageQ g_MQ;
 
 ChatServer g_ChatServer;
 
 ChatServer::ChatServer()
+	:SESSION_TIMEOUT_{ 0 }, PLAYER_TIMEOUT_{ 0 }
 {}
 
 void ChatServer::Start()
@@ -37,10 +46,9 @@ void ChatServer::Start()
 	TICK_PER_FRAME_ = _wtoi((LPCWSTR)pStart);
 
 	GetValue(psr, L"SESSION_TIMEOUT", (PVOID*)&pStart, nullptr);
-	SESSION_TIMEOUT_ = (ULONGLONG)_wtoi64((LPCWSTR)pStart);
+	IGNORE_CONST(SESSION_TIMEOUT_) = (ULONGLONG)_wtoi64((LPCWSTR)pStart);
 	GetValue(psr, L"PLAYER_TIMEOUT", (PVOID*)&pStart, nullptr);
-	PLAYER_TIMEOUT_ = (ULONGLONG)_wtoi64((LPCWSTR)pStart);
-
+	IGNORE_CONST(PLAYER_TIMEOUT_) = (ULONGLONG)_wtoi64((LPCWSTR)pStart);
 	ReleaseParser(psr);
 
 	Player::pPlayerArr = new Player[maxSession_];
@@ -49,6 +57,10 @@ void ChatServer::Start()
 		ResumeThread(hIOCPWorkerThreadArr_[i]);
 
 	ResumeThread(hAcceptThread_);
+
+	//pLanClient_ = new CMClient;
+	//pLanClient_->Start();
+
 	ChattingUpdate* pChatUpdate = new ChattingUpdate{ (DWORD)TICK_PER_FRAME_,hcp_,5 };
 	MonitoringUpdate* pMonitor = new MonitoringUpdate{ hcp_,1000,5 };
 	Timer::Reigster_UPDATE(pChatUpdate);
@@ -143,21 +155,28 @@ void ChatServer::Monitoring()
 	ULONGLONG disconnectTPS = InterlockedExchange(&disconnectTPS_, 0);
 	ULONGLONG recvTPS = InterlockedExchange(&recvTPS_, 0);
 	LONG sendTPS = InterlockedExchange(&sendTPS_, 0);
+	LONG sessionNum = lSessionNum_;
+	LONG playerNum = lPlayerNum;
+
 	acceptTotal_ += acceptTPS;
 	RECV_TOTAL += recvTPS;
 	UPDATE_CNT_TOTAL += UPDATE_CNT_TPS;
 
+	double processPrivateMByte = monitor.GetPPB() / (1024 * 1024);
+	double nonPagedPoolMByte = monitor.GetNPB() / (1024 * 1024);
+	double availableByte = monitor.GetAB();
+
+
 	printf(
 		"Elapsed Time : %02lluD-%02lluH-%02lluMin-%02lluSec\n"
 		"update Count : %d\n"
-		"update Count AVR : %.2f\n"
 		"Packet Pool Alloc Capacity : %d\n"
+		"Packet Pool Alloc UseSize: %d\n"
 		"MessageQ Capacity : %d\n"
-		"MessageQ Queued By Worker : %llu\n"
+		"MessageQ Queued By Worker : %d\n"
 		"SendQ Pool Capacity : %d\n"
 		"Accept TPS: %llu\n"
 		"Accept Total : %llu\n"
-		"Accept AVR : %.2f\n"
 		"Disconnect TPS: %llu\n"
 		"Recv Msg TPS: %llu\n"
 		"Send Msg TPS: %d\n"
@@ -174,28 +193,40 @@ void ChatServer::Monitoring()
 		"TCP Retransmitted/sec : %.2f\n\n",
 		ullElapsedDay, ullElapsedHour, ullElapsedMin, ullElapsedSecond,
 		UPDATE_CNT_TPS,
-		UPDATE_CNT_TOTAL / (float)temp,
-		Packet::packetPool_.capacity_,
+		Packet::packetPool_.capacity_ * Bucket<Packet, false>::size,
+		Packet::packetPool_.AllocSize_,
 		g_MQ.packetPool_.capacity_,
-		g_MQ.workerEnqueuedBufferCnt_,
+		g_MQ.packetPool_.AllocSize_,
 		pSessionArr_[0].sendPacketQ_.nodePool_.capacity_,
 		acceptTPS,
 		acceptTotal_,
-		acceptTotal_ / (float)temp,
 		disconnectTPS,
 		recvTPS,
 		sendTPS,
-		lSessionNum_,
+		sessionNum,
 		lPlayerNum,
-		monitor.GetPPB() / (1024 * 1024),
+		processPrivateMByte,
 		monitor.GetPNPB() / 1024,
-		monitor.GetAB(),
-		monitor.GetNPB() / (1024 * 1024),
+		availableByte,
+		nonPagedPoolMByte,
 		monitor._fProcessorTotal,
 		monitor._fProcessTotal,
 		(float)(PROCESS_CPU_TICK_ELAPSED / (double)monitor._iNumberOfProcessors / (double)PROCESS_CPU_TICK_TIME_DIFF) * 100.0f,
 		monitor.GetRetranse()
 		);
+
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_SERVER_RUN, (int)1, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_SERVER_CPU, (int)monitor._fProcessTotal, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_SERVER_MEM, (int)processPrivateMByte, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_SESSION, (int)sessionNum, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_PLAYER, (int)playerNum, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_UPDATE_TPS, (int)UPDATE_CNT_TPS, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_PACKET_POOL, (int)(Packet::packetPool_.capacity_ * Bucket<Packet, false>::size), timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_CHAT_UPDATEMSG_POOL, (int)g_MQ.packetPool_.size_, timeGetTime());
+
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_MONITOR_CPU_TOTAL, (int)monitor._fProcessorTotal, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_MONITOR_NONPAGED_MEMORY, (int)nonPagedPoolMByte, timeGetTime());
+	pLanClient_->SendToMonitoringServer(CHAT, dfMONITOR_DATA_TYPE_MONITOR_AVAILABLE_MEMORY, (int)availableByte, timeGetTime());
 
 	UPDATE_CNT_TPS = 0;
 }
