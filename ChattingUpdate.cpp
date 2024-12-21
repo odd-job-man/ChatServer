@@ -40,7 +40,6 @@ void ChattingUpdate::Update_IMPL()
 
 void ChattingUpdate::OnMonitor()
 {
-	printf("FPS : %d\n", InterlockedExchange(&fps_, 0));
 	g_ChatServer.Monitoring();
 }
 

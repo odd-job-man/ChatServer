@@ -161,8 +161,14 @@
     <ClInclude Include="..\..\LanClient\LanClient\LanClientSession.h">
       <Filter>LanClient</Filter>
     </ClInclude>
-    <ClInclude Include="CMClient.h">
-      <Filter>MonitoringClient</Filter>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\DB\DBWriteThreadBase.h">
+      <Filter>ServerCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\CMClient.h">
+      <Filter>ServerCommon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ServerCommon\ServerCommon\ServerNum.h">
+      <Filter>ServerCommon</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -220,8 +226,11 @@
     <ClCompile Include="..\..\LanClient\LanClient\LanClientSession.cpp">
       <Filter>LanClient</Filter>
     </ClCompile>
-    <ClCompile Include="CMClient.cpp">
-      <Filter>MonitoringClient</Filter>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\DB\DBWriteThreadBase.cpp">
+      <Filter>ServerCommon\DB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ServerCommon\ServerCommon\CMClient.cpp">
+      <Filter>ServerCommon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

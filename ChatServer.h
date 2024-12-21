@@ -16,7 +16,7 @@ public:
 	virtual void OnPost(void* order);
 	void Monitoring();
 	void DisconnectAll();
-	LONG TICK_PER_FRAME_;
+	const LONG TICK_PER_FRAME_;
 	const ULONGLONG SESSION_TIMEOUT_;
 	const ULONGLONG PLAYER_TIMEOUT_;
 	LONG UPDATE_CNT_TPS = 0;

@@ -3,6 +3,7 @@
 #include "Sector.h"
 #include "MemLog.h"
 #include "ChatServer.h"
+#include "ServerNum.h"
 
 extern ChatServer g_ChatServer;
 
